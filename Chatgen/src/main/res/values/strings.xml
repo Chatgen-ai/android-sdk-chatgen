@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">UI</string>
+    <string name="count">Count</string>
+    <string name="up">Up</string>
+    <string name="up_button">Button</string>
+    <string name="show_count">TextView</string>
+</resources>

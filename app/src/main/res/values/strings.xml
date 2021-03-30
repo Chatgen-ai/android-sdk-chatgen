@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">chatgen-sdk-android</string>
+    <string name="display_launcher">Display Launcher Icon</string>
+    <string name="hide_launcher">Hide Launcher Icon</string>
+    <string name="open_chat">Open Chatbot</string>
+    <string name="start_dialog">Start Dialog</string>
+    <string name="send_dialog">Open Chatbot and Send Message</string>
+</resources>
