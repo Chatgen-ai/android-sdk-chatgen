@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         chatgen = Chatgen.getInstance();
         FrameLayout frameLayout = findViewById(R.id.relativeMine);
-        chatgen.init(this,"kvMYnFrH", frameLayout);
+        chatgen.init(this,"kvMYnFrH");
 
         chatgen.onEventFromBot(botEvent -> {
             Log.d("GoodLord", botEvent.getCode());

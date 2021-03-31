@@ -64,19 +64,10 @@ public class Chatgen {
         this.botListener = botListener;
     }
 
-    public void init(Context context, String s, FrameLayout frameLayout) {
+    public void init(Context context, String s) {
         config = new ChatgenConfig(s);
         config.webView = new WebviewOverlay();
         ConfigService.getInstance().setConfigData(config);
-
-        frameLayout = new FrameLayout(context);
-        webView = new WebView(context);
-        webView.setId(View.NO_ID);
-        webView.setWebChromeClient(new WebChromeClient());
-        webView.setWebViewClient(new WebViewClient());
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadUrl("https://www.chatgen.ai");
-        frameLayout.addView(webView);
     }
 
     public void startChatbot(Context context) {
@@ -88,12 +79,11 @@ public class Chatgen {
     }
 
     public void startChatbotWithDialog(Context context, String dialogId) {
-        webView.setVisibility(View.VISIBLE);
-//        config.dialogId = dialogId;
-//        webViewContext = context;
-//        webViewIntent = new Intent(webViewContext, BotWebView.class);
-//        webViewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        webViewContext.startActivity(webViewIntent);
+        config.dialogId = dialogId;
+        webViewContext = context;
+        webViewIntent = new Intent(webViewContext, BotWebView.class);
+        webViewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        webViewContext.startActivity(webViewIntent);
     }
 
     public void closeBot(){
