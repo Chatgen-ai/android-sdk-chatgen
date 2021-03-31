@@ -2,9 +2,13 @@ package com.example.chatgen_sdk_android;
 
 import android.os.Bundle;
 import android.os.Looper;
+import android.text.Layout;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -21,27 +25,23 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        chatgen = new Chatgen();
-        chatgen.init("kvMYnFrH");
+        chatgen = Chatgen.getInstance();
+        FrameLayout frameLayout = findViewById(R.id.relativeMine);
+        chatgen.init(this,"kvMYnFrH", frameLayout);
 
-        chatgen.getInstance().onEventFromBot(botEvent -> {
+        chatgen.onEventFromBot(botEvent -> {
             Log.d("GoodLord", botEvent.getCode());
             if(botEvent.getCode() == "bot-loaded" && sendMessageStatus == true){
                 sendMessageStatus = false;
-                new android.os.Handler(Looper.getMainLooper()).postDelayed(
-                        new Runnable() {
-                            public void run() {
-                                chatgen.sendMessage("Hello How are you");
-                            }
-                        },
-                        3000);
+                chatgen.sendMessage("Hello How are you");
             }
         });
+
+        setContentView(R.layout.activity_main);
     }
 
     public void openChat(View v){
-        chatgen.startChatbotWithDialog(this, "live");
+        chatgen.startChatbot(this);
     }
 
     public void startDialog(View v){

@@ -2,14 +2,17 @@ package com.example.chatgen;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.chatgen.models.ChatbotEventResponse;
@@ -39,8 +42,14 @@ public class BotWebView extends AppCompatActivity {
             this.getSupportActionBar().hide();
         }
         catch (NullPointerException e){}
+        ViewCompat.setOnApplyWindowInsetsListener(
+                findViewById(android.R.id.content), (v, insets) -> {
+                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                    params.bottomMargin = insets.getSystemWindowInsetBottom();
+                    return insets.consumeSystemWindowInsets();
+                });
         setContentView(R.layout.bot_web_view);
-        wb = ConfigService.getInstance().getConfig().webView;
+        wb = new WebviewOverlay();
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().add(R.id.container, wb).commit();
     }
@@ -57,6 +66,7 @@ public class BotWebView extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         closeBot();
     }
 }

@@ -1,12 +1,30 @@
 package com.example.chatgen;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
+import android.view.Window;
+import android.view.WindowManager;
+import android.webkit.ConsoleMessage;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import com.example.chatgen.models.ChatbotEventResponse;
 import com.example.chatgen.models.ConfigService;
@@ -18,11 +36,12 @@ public class Chatgen {
     private static Intent webViewIntent;
     private static Chatgen botPluginInstance;
     private static ChatgenConfig config;
+    private static WebView webView;
     private int mCount;
     private TextView countView;
-    private WebView webView;
     private static BotEventListener botListener;
     private static BotEventListener localListener;
+
     public Chatgen(){
         this.botListener = botEvent -> {};
     }
@@ -45,33 +64,43 @@ public class Chatgen {
         this.botListener = botListener;
     }
 
-    public static void init(String s) {
+    public void init(Context context, String s, FrameLayout frameLayout) {
         config = new ChatgenConfig(s);
         config.webView = new WebviewOverlay();
         ConfigService.getInstance().setConfigData(config);
+
+        frameLayout = new FrameLayout(context);
+        webView = new WebView(context);
+        webView.setId(View.NO_ID);
+        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebViewClient(new WebViewClient());
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.loadUrl("https://www.chatgen.ai");
+        frameLayout.addView(webView);
     }
 
-    public static void startChatbot(Context context) {
-        config.dialogId = "ChatGenLive";
+    public void startChatbot(Context context) {
+        config.dialogId = "";
         webViewContext = context;
         webViewIntent = new Intent(webViewContext, BotWebView.class);
         webViewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         webViewContext.startActivity(webViewIntent);
     }
 
-    public static void startChatbotWithDialog(Context context, String dialogId) {
-        config.dialogId = dialogId;
-        webViewContext = context;
-        webViewIntent = new Intent(webViewContext, BotWebView.class);
-        webViewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        webViewContext.startActivity(webViewIntent);
+    public void startChatbotWithDialog(Context context, String dialogId) {
+        webView.setVisibility(View.VISIBLE);
+//        config.dialogId = dialogId;
+//        webViewContext = context;
+//        webViewIntent = new Intent(webViewContext, BotWebView.class);
+//        webViewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        webViewContext.startActivity(webViewIntent);
     }
 
-    public static void closeBot(){
+    public void closeBot(){
         localListener.onSuccess(new ChatbotEventResponse("closeBot", ""));
     }
 
-    public static void sendMessage(String s){
+    public void sendMessage(String s){
         localListener.onSuccess(new ChatbotEventResponse("sendMessage", s));
     }
 
@@ -79,6 +108,27 @@ public class Chatgen {
         if(event != null){
             botListener.onSuccess(event);
             localListener.onSuccess(event);
+        }
+    }
+
+    public class myWebClient extends WebViewClient {
+        @Override
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            // TODO Auto-generated method stub
+            super.onPageStarted(view, url, favicon);
+        }
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            // TODO Auto-generated method stub
+            view.loadUrl(url);
+            return true;
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            // TODO Auto-generated method stub
+            super.onPageFinished(view, url);
         }
     }
 }
