@@ -76,7 +76,7 @@ public class BotWebView extends AppCompatActivity {
     }
 
     private void copyAssets() {
-        File myDir = new File(getFilesDir(), "cg-widget");
+        File myDir = new File(this.getFilesDir(), "cg-widget");
         if(!myDir.isDirectory()){
             myDir.mkdir();
         }
