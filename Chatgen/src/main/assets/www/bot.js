@@ -271,7 +271,7 @@ window.ChatGen = (function () {
           window.ChatGen.loaded = true;
           const iframe = document.createElement('iframe');
           iframe.id = 'selekt-chat-widget';
-          iframe.src = 'file:///android_asset/www/index.html';
+          iframe.src = './index.html';
           console.log("iframe",iframe.src);
           iframe.style =
             'display: block; bottom: unset; left: unset; right: unset; top: unset; border: none; min-width: unset; min-height: unset; position: fixed;visibility:hidden;border: 0px;z-index:9999999999;margin: 0px;padding: 0px;background: none; width:0px;height:0px';

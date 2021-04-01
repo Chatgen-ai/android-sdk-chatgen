@@ -41,15 +41,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void openChat(View v){
-        chatgen.startChatbot(this);
+        chatgen.startChatbotWithDialog(this, "816892");
     }
 
     public void startDialog(View v){
-        chatgen.startChatbotWithDialog(this, "mohansairaju");
+        chatgen.startChatbotWithDialog(this, "776665");
     }
 
     public void sendChatMessage(View v) {
-        chatgen.startChatbotWithDialog(this, "live");
+        chatgen.startChatbotWithDialog(this, "816892");
         sendMessageStatus = true;
     }
 }

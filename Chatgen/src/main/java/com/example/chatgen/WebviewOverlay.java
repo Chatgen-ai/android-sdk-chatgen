@@ -31,6 +31,8 @@ import com.example.chatgen.models.ChatbotEventResponse;
 import com.example.chatgen.models.ConfigService;
 import com.example.chatgen.models.JavaScriptInterface;
 
+import java.io.File;
+
 import static android.app.Activity.RESULT_OK;
 
 public class WebviewOverlay extends Fragment {
@@ -185,13 +187,11 @@ public class WebviewOverlay extends Fragment {
             }
         });
         String widgetKey = ConfigService.getInstance().getConfig().widgetKey;
-        String interactionId = ConfigService.getInstance().getConfig().dialogId;
-//        String botUrl = "https://test-nlp.selekt.in/public/empty.html?server=test&key="+widgetKey;
-        String botUrl = "file:///android_asset/utils/load.html?server=test&key=kvMYnFrH";
-        if(!interactionId.isEmpty()){
-          botUrl = botUrl + "#" + interactionId;
-        }
-        Log.d("botURL", "= "+botUrl);
+        String yourFilePath = "file:///" + context.getFilesDir() + "/cg-widget/load.html";
+        File yourFile = new File( yourFilePath );
+        String botUrl = yourFile.toString();
+        botUrl += "?server=test&key=" + widgetKey;
+        Log.d("FinalBotURL", "= "+botUrl);
         myWebView.loadUrl(botUrl);
         return myWebView;
     }
@@ -204,16 +204,22 @@ public class WebviewOverlay extends Fragment {
     //Widget will call this function when bot is completely loaded
     public void botLoaded() {
         String interactionId = ConfigService.getInstance().getConfig().dialogId;
-        String finalJsScript = "javascript:(ChatGen.openWidget())";
+        String jsScript = "";
+        if(interactionId != ""){
+            jsScript = "javascript:(function startInteraction(){ChatGen.startInteraction({interactionId:'"+interactionId+"'})})();";
+        } else {
+            jsScript = "javascript:(function startInteraction(){ChatGen.openWidget()})();";
+        }
+        final String finalJsScript = jsScript;
         myWebView.post(new Runnable() {
             @Override
             public void run() {
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    Log.d("botloadedifi", finalJsScript);
+                    Log.d("BotLoadedScript", finalJsScript);
                     myWebView.evaluateJavascript(finalJsScript, null);
                 }
                 else {
-                    Log.d("botloadedifi", finalJsScript);
+                    Log.d("BotLoadedScript2", finalJsScript);
                     myWebView.loadUrl(finalJsScript);
                 }
             }
@@ -223,17 +229,16 @@ public class WebviewOverlay extends Fragment {
 
     // Sending messages to bot
     public void sendMessage(String s) {
-        Log.d("sendingmessage", "tt = " + s);
         String jsScript = "javascript:(setTimeout(function(){ChatGen.sendMessage('"+s+"')}, 3000))";
         myWebView.post(new Runnable() {
             @Override
             public void run() {
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    Log.d("ifiams", "condition");
+                    Log.d("SendingMessageScript", jsScript);
                     myWebView.evaluateJavascript(jsScript, null);
                 }
                 else {
-                    Log.d("Elseiam", "Condition");
+                    Log.d("SendingMessageScript2", jsScript);
                     myWebView.loadUrl(jsScript);
                 }
             }
