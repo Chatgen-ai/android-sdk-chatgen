@@ -15,6 +15,8 @@ import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import com.example.chatgen.models.ChatbotEventResponse;
@@ -120,6 +123,10 @@ public class WebviewOverlay extends Fragment {
         if (Build.VERSION.SDK_INT > 17) {
             myWebView.getSettings().setMediaPlaybackRequiresUserGesture(false);
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            myWebView.setWebContentsDebuggingEnabled(true);
+        }
         myWebView.addJavascriptInterface(new JavaScriptInterface((BotWebView) getActivity(), myWebView), "ChatgenHandler");
 
         myWebView.setWebViewClient(new myWebClient());
@@ -179,7 +186,8 @@ public class WebviewOverlay extends Fragment {
         });
         String widgetKey = ConfigService.getInstance().getConfig().widgetKey;
         String interactionId = ConfigService.getInstance().getConfig().dialogId;
-        String botUrl = "https://test-nlp.selekt.in/public/empty.html?server=test&key="+widgetKey;
+//        String botUrl = "https://test-nlp.selekt.in/public/empty.html?server=test&key="+widgetKey;
+        String botUrl = "file:///android_asset/utils/load.html?server=test&key=kvMYnFrH";
         if(!interactionId.isEmpty()){
           botUrl = botUrl + "#" + interactionId;
         }
@@ -242,6 +250,7 @@ public class WebviewOverlay extends Fragment {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             // TODO Auto-generated method stub
+            Log.d("shouldoverrideurl", url);
             view.loadUrl(url);
             return true;
         }
@@ -250,6 +259,13 @@ public class WebviewOverlay extends Fragment {
         public void onPageFinished(WebView view, String url) {
             // TODO Auto-generated method stub
             super.onPageFinished(view, url);
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.M)
+        @Override
+        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error){
+            //Your code to do
+            Toast.makeText(getActivity(), "Your Internet Connection May not be active Or " + error.getDescription(), Toast.LENGTH_LONG).show();
         }
     }
 }

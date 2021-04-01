@@ -1,6 +1,8 @@
 package com.example.chatgen;
 
+import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -17,6 +19,9 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.chatgen.models.ChatbotEventResponse;
 import com.example.chatgen.models.ConfigService;
+
+import java.io.File;
+import java.io.IOException;
 
 public class BotWebView extends AppCompatActivity {
 
@@ -50,6 +55,20 @@ public class BotWebView extends AppCompatActivity {
                 });
         setContentView(R.layout.bot_web_view);
         wb = new WebviewOverlay();
+        String dir = this.getFilesDir().getAbsolutePath();
+        System.out.println("writser" + dir);
+
+        AssetManager assetManager = this.getAssets();
+        String[] files = null;
+        try {
+            files = assetManager.list("www");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        for(String filename : files) {
+            Log.d("AssetManagerCheck", filename);
+            System.out.println("working");
+        }
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().add(R.id.container, wb).commit();
     }
