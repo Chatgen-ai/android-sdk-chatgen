@@ -22,18 +22,6 @@ public class JavaScriptInterface {
     }
 
     @JavascriptInterface
-    public void loadURL(String url) {
-        final String u = url;
-
-        parentActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mWebView.loadUrl(u);
-            }
-        });
-    }
-
-    @JavascriptInterface
     public void  receiveMessage(String s) {
         ChatbotEventResponse incomingEvent = new Gson().fromJson(s, ChatbotEventResponse.class);
         // Pass-through events (Bot will not close)

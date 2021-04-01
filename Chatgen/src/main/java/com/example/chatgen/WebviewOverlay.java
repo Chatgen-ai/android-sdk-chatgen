@@ -249,10 +249,8 @@ public class WebviewOverlay extends Fragment {
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            // TODO Auto-generated method stub
-            Log.d("shouldoverrideurl", url);
-            view.loadUrl(url);
-            return true;
+            super.shouldOverrideUrlLoading(view, url);
+            return false;
         }
 
         @Override
