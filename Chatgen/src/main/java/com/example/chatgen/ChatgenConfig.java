@@ -1,7 +1,5 @@
 package com.example.chatgen;
 
-import android.webkit.WebView;
-
 public class ChatgenConfig {
     public String widgetKey;
     public String dialogId = "ChatGenLive";

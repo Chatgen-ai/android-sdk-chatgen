@@ -1,36 +1,14 @@
 package com.example.chatgen;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.text.Layout;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewStub;
-import android.view.Window;
-import android.view.WindowManager;
-import android.webkit.ConsoleMessage;
-import android.webkit.WebChromeClient;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import com.example.chatgen.models.ChatbotEventResponse;
 import com.example.chatgen.models.ConfigService;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -76,6 +54,7 @@ public class Chatgen {
         config = new ChatgenConfig(s);
         config.webView = new WebviewOverlay();
         ConfigService.getInstance().setConfigData(config);
+        copyAssets(context);
     }
 
     public void startChatbot(Context context) {
@@ -106,6 +85,47 @@ public class Chatgen {
         if(event != null){
             botListener.onSuccess(event);
             localListener.onSuccess(event);
+        }
+    }
+
+    private void copyAssets(Context context) {
+        File myDir = new File(context.getFilesDir(), "cg-widget");
+        if(!myDir.isDirectory()){
+            myDir.mkdir();
+        }
+        String widgetDirectory = context.getFilesDir() + "/cg-widget";
+        AssetManager assetManager = context.getAssets();
+        String[] files = null;
+        try {
+            files = assetManager.list("cg-widget");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        for(String filename : files) {
+            InputStream in = null;
+            OutputStream out = null;
+            try {
+                in = assetManager.open("cg-widget/" +filename);
+                String outDir = widgetDirectory;
+                File outFile = new File(outDir, filename);
+                out = new FileOutputStream(outFile);
+                copyFile(in, out);
+                in.close();
+                in = null;
+                out.flush();
+                out.close();
+                out = null;
+            } catch(IOException e) {
+                Log.e("AssetCopyFailure", "Failed to copy asset file: " + filename, e);
+            }
+        }
+    }
+
+    private void copyFile(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        int read;
+        while((read = in.read(buffer)) != -1){
+            out.write(buffer, 0, read);
         }
     }
 }
