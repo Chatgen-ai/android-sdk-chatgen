@@ -54,6 +54,7 @@ public class Chatgen {
         config = new ChatgenConfig(s);
         config.webView = new WebviewOverlay();
         ConfigService.getInstance().setConfigData(config);
+        Log.d("INIT", "copy assets");
         copyAssets(context);
     }
 
@@ -66,6 +67,7 @@ public class Chatgen {
     }
 
     public void startChatbotWithDialog(Context context, String dialogId) {
+        Log.d("WebViewConsoleMessage", "Start ChatBot with dialog");
         config.dialogId = dialogId;
         webViewContext = context;
         webViewIntent = new Intent(webViewContext, BotWebView.class);

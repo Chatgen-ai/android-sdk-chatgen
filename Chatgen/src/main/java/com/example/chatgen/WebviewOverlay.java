@@ -42,6 +42,8 @@ public class WebviewOverlay extends Fragment {
     private Uri mCapturedImageURI = null;
     private ValueCallback<Uri[]> mFilePathCallback;
     private String mCameraPhotoPath;
+    public long start;
+    public long end = 0;
     private static final int INPUT_FILE_REQUEST_CODE = 1;
     private static final int FILECHOOSER_RESULTCODE = 1;
 
@@ -190,9 +192,10 @@ public class WebviewOverlay extends Fragment {
         String yourFilePath = "file:///" + context.getFilesDir() + "/cg-widget/load.html";
         File yourFile = new File( yourFilePath );
         String botUrl = yourFile.toString();
-        botUrl += "?server=test&key=" + widgetKey;
-        Log.d("FinalBotURL", "= "+botUrl);
+        botUrl += "?server=test&key=" + widgetKey + "&interactionId=" + ConfigService.getInstance().getConfig().dialogId + "&isChatGenSDK=1";
+        Log.d("WebViewConsoleMessage", "URL = "+botUrl);
         myWebView.loadUrl(botUrl);
+        this.start = System.nanoTime();
         return myWebView;
     }
 
@@ -201,12 +204,21 @@ public class WebviewOverlay extends Fragment {
         myWebView.loadUrl("");
     }
 
+    public void onMessage() {
+        Log.d("WebViewConsoleMessage", "received");
+        if (this.end == 0) {
+            this.end = System.nanoTime();
+            Log.d("WebViewConsoleMessage", "took " + (end - start)/1000000 + " ms");
+        }
+    }
+
     //Widget will call this function when bot is completely loaded
     public void botLoaded() {
         String interactionId = ConfigService.getInstance().getConfig().dialogId;
+        this.start = System.nanoTime();
         String jsScript = "";
         if(interactionId != ""){
-            jsScript = "javascript:(function startInteraction(){ChatGen.startInteraction({interactionId:'"+interactionId+"'})})();";
+//            jsScript = "javascript:(function startInteraction(){ChatGen.startInteraction({interactionId:'"+interactionId+"'})})();";
         } else {
             jsScript = "javascript:(function startInteraction(){ChatGen.openWidget()})();";
         }

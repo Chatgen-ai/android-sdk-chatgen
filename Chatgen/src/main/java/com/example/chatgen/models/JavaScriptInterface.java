@@ -51,5 +51,15 @@ public class JavaScriptInterface {
             }
         });
     }
+
+    @JavascriptInterface
+    public void onMessage() {
+        parentActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                parentActivity.onMessage();
+            }
+        });
+    }
 }
 

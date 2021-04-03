@@ -59,6 +59,10 @@ public class BotWebView extends AppCompatActivity {
         wb.botLoaded();
     }
 
+    public void onMessage() {
+        wb.onMessage();
+    }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
