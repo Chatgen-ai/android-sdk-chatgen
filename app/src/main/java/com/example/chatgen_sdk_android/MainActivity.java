@@ -40,16 +40,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    public void openChat(View v){
+    public void openChat(View v) {
         chatgen.startChatbotWithDialog(this, "776425");
     }
 
     public void startDialog(View v){
-        chatgen.startChatbotWithDialog(this, "776665");
+        chatgen.startChatbotWithDialog(this, "776425");
     }
 
     public void sendChatMessage(View v) {
-        chatgen.startChatbotWithDialog(this, "816892");
+        chatgen.startChatbotWithDialog(this, "776425");
         sendMessageStatus = true;
     }
 }

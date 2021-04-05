@@ -133,7 +133,7 @@ public class WebviewOverlay extends Fragment {
         }
         myWebView.addJavascriptInterface(new JavaScriptInterface((BotWebView) getActivity(), myWebView), "ChatgenHandler");
 
-        myWebView.setWebViewClient(new myWebClient());
+        myWebView.setWebViewClient(new myWebClient() {});
 
         myWebView.setWebChromeClient(new WebChromeClient() {
 
@@ -170,23 +170,23 @@ public class WebviewOverlay extends Fragment {
                 getActivity().getWindow().getDecorView().setSystemUiVisibility(3846 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             }
 
-            @Override
-            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
-                WebView newWebView = new WebView(context);
-                WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
-                transport.setWebView(newWebView);
-                resultMsg.sendToTarget();
-                newWebView.setWebViewClient(new WebViewClient() {
-                    @Override
-                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW);
-                        browserIntent.setData(Uri.parse(url));
-                        startActivity(browserIntent);
-                        return true;
-                    }
-                });
-                return true;
-            }
+//            @Override
+//            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
+//                WebView newWebView = new WebView(context);
+//                WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
+//                transport.setWebView(newWebView);
+//                resultMsg.sendToTarget();
+//                newWebView.setWebViewClient(new WebViewClient() {
+//                    @Override
+//                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+//                        Intent browserIntent = new Intent(Intent.ACTION_VIEW);
+//                        browserIntent.setData(Uri.parse(url));
+//                        startActivity(browserIntent);
+//                        return true;
+//                    }
+//                });
+//                return true;
+//            }
         });
         String widgetKey = ConfigService.getInstance().getConfig().widgetKey;
         String yourFilePath = "file:///" + context.getFilesDir() + "/cg-widget/load.html";

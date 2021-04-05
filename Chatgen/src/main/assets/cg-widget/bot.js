@@ -258,12 +258,9 @@ window.ChatGen = (function () {
       const scriptEl = document.createRange().createContextualFragment(chatgenGAScript);
       document.body.append(scriptEl);
       console.log("WidgetKey", _args.widget_key);
-      var url = new URL(window.location.href);
-      var interactionId = url.searchParams.get('interactionId');
       if (typeof _args.widget_key !== 'undefined') {
         widget_key = _args.widget_key;
         _args.identifier = window.chatgenSettings;
-        _args.interactionId = interactionId;
         function injectIframeFunction () {
           if (window.ChatGen && window.ChatGen.loaded) {
             console.log('return bhai ek bar hai');
@@ -274,7 +271,7 @@ window.ChatGen = (function () {
           window.ChatGen.loaded = true;
           const iframe = document.createElement('iframe');
           iframe.id = 'selekt-chat-widget';
-          iframe.src = './index.html?isChatGenSDK=1';
+          iframe.src = './index.html';
           console.log("iframe",iframe.src);
           iframe.style =
             'display: block; bottom: unset; left: unset; right: unset; top: unset; border: none; min-width: unset; min-height: unset; position: fixed;visibility:hidden;border: 0px;z-index:9999999999;margin: 0px;padding: 0px;background: none; width:0px;height:0px';
@@ -403,21 +400,16 @@ window.ChatGen = (function () {
               if (dataType === 'SET_COOKIE' || dataType === 'ERASE_COOKIE') {
                 parent.document.cookie = data.value;
               }
-              if (dataType === 'NEW_MESSAGE') {
-                ChatgenHandler.onMessage();
-              }
-              if (dataType === 'BOT_LOADED') {
-                try{
-                  ChatgenHandler.botLoaded();
-                } catch(e){
-                  console.log(e);
-                }
-              }
               if (dataType === 'GET_COOKIE') {
                 var cookies = parent.document.cookie;
                 isBotLoaded = true;
                 iframe.contentWindow.postMessage({ origin: 'cookies', cookies: cookies, args: e.data.args }, '*');
                 sendDimentions();
+                try{
+                  ChatgenHandler.botLoaded();
+                }catch(e){
+                  console.log(e);
+                }
               }
               else if (dataType === 'WIDGET_CLOSED'){
                 try{
