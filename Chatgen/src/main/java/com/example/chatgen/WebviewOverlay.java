@@ -17,6 +17,7 @@ import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
@@ -119,74 +120,28 @@ public class WebviewOverlay extends Fragment {
         final Context context = getActivity();
         myWebView = new WebView(context);
         myWebView.getSettings().setJavaScriptEnabled(true);
-        myWebView.getSettings().setDomStorageEnabled(true);
         myWebView.getSettings().setSupportMultipleWindows(true);
         myWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         myWebView.getSettings().setAllowFileAccess(true);
         myWebView.getSettings().setGeolocationDatabasePath(context.getFilesDir().getPath());
-        if (Build.VERSION.SDK_INT > 17) {
-            myWebView.getSettings().setMediaPlaybackRequiresUserGesture(false);
-        }
+        //Performance
+        myWebView.getSettings().setDomStorageEnabled(true);
+        myWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             myWebView.setWebContentsDebuggingEnabled(true);
         }
         myWebView.addJavascriptInterface(new JavaScriptInterface((BotWebView) getActivity(), myWebView), "ChatgenHandler");
 
-        myWebView.setWebViewClient(new myWebClient() {});
+        myWebView.setWebViewClient(new myWebClient());
 
         myWebView.setWebChromeClient(new WebChromeClient() {
-
-            private View mCustomView;
-            private CustomViewCallback mCustomViewCallback;
-            private int mOriginalOrientation;
-            private int mOriginalSystemUiVisibility;
 
             @Override
             public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
                 Log.d("WebViewConsoleMessage", consoleMessage.message());
                 return true;
             }
-
-            public void onHideCustomView() {
-                ((FrameLayout) getActivity().getWindow().getDecorView()).removeView(this.mCustomView);
-                this.mCustomView = null;
-                getActivity().getWindow().getDecorView().setSystemUiVisibility(this.mOriginalSystemUiVisibility);
-                getActivity().setRequestedOrientation(this.mOriginalOrientation);
-                this.mCustomViewCallback.onCustomViewHidden();
-                this.mCustomViewCallback = null;
-            }
-
-            public void onShowCustomView(View paramView, CustomViewCallback paramCustomViewCallback) {
-                if (this.mCustomView != null) {
-                    onHideCustomView();
-                    return;
-                }
-                this.mCustomView = paramView;
-                this.mOriginalSystemUiVisibility = getActivity().getWindow().getDecorView().getSystemUiVisibility();
-                this.mOriginalOrientation = getActivity().getRequestedOrientation();
-                this.mCustomViewCallback = paramCustomViewCallback;
-                ((FrameLayout) getActivity().getWindow().getDecorView()).addView(this.mCustomView, new FrameLayout.LayoutParams(-1, -1));
-                getActivity().getWindow().getDecorView().setSystemUiVisibility(3846 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            }
-
-//            @Override
-//            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
-//                WebView newWebView = new WebView(context);
-//                WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
-//                transport.setWebView(newWebView);
-//                resultMsg.sendToTarget();
-//                newWebView.setWebViewClient(new WebViewClient() {
-//                    @Override
-//                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-//                        Intent browserIntent = new Intent(Intent.ACTION_VIEW);
-//                        browserIntent.setData(Uri.parse(url));
-//                        startActivity(browserIntent);
-//                        return true;
-//                    }
-//                });
-//                return true;
-//            }
         });
         String widgetKey = ConfigService.getInstance().getConfig().widgetKey;
         String yourFilePath = "file:///" + context.getFilesDir() + "/cg-widget/load.html";
@@ -198,6 +153,7 @@ public class WebviewOverlay extends Fragment {
         this.start = System.nanoTime();
         return myWebView;
     }
+
 
     //Empty url string on bot-close
     public void closeBot() {
@@ -214,34 +170,12 @@ public class WebviewOverlay extends Fragment {
 
     //Widget will call this function when bot is completely loaded
     public void botLoaded() {
-        String interactionId = ConfigService.getInstance().getConfig().dialogId;
-        this.start = System.nanoTime();
-        String jsScript = "";
-        if(interactionId != ""){
-//            jsScript = "javascript:(function startInteraction(){ChatGen.startInteraction({interactionId:'"+interactionId+"'})})();";
-        } else {
-            jsScript = "javascript:(function startInteraction(){ChatGen.openWidget()})();";
-        }
-        final String finalJsScript = jsScript;
-        myWebView.post(new Runnable() {
-            @Override
-            public void run() {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    Log.d("BotLoadedScript", finalJsScript);
-                    myWebView.evaluateJavascript(finalJsScript, null);
-                }
-                else {
-                    Log.d("BotLoadedScript2", finalJsScript);
-                    myWebView.loadUrl(finalJsScript);
-                }
-            }
-        });
         Chatgen.getInstance().emitEvent(new ChatbotEventResponse("bot-loaded", ""));
     }
 
     // Sending messages to bot
     public void sendMessage(String s) {
-        String jsScript = "javascript:(setTimeout(function(){ChatGen.sendMessage('"+s+"')}, 3000))";
+        String jsScript = "javascript:(setTimeout(function(){ChatGen.sendMessage('"+s+"')}, 500))";
         myWebView.post(new Runnable() {
             @Override
             public void run() {
@@ -260,19 +194,11 @@ public class WebviewOverlay extends Fragment {
     public class myWebClient extends WebViewClient {
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
-            // TODO Auto-generated method stub
             super.onPageStarted(view, url, favicon);
         }
 
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            super.shouldOverrideUrlLoading(view, url);
-            return false;
-        }
-
-        @Override
         public void onPageFinished(WebView view, String url) {
-            // TODO Auto-generated method stub
             super.onPageFinished(view, url);
         }
 

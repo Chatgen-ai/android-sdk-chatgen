@@ -3,12 +3,18 @@ package com.example.chatgen;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.os.Build;
 import android.util.Log;
+import android.webkit.ConsoleMessage;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import com.example.chatgen.models.ChatbotEventResponse;
 import com.example.chatgen.models.ConfigService;
+import com.example.chatgen.models.JavaScriptInterface;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,11 +28,12 @@ public class Chatgen {
     private static Intent webViewIntent;
     private static Chatgen botPluginInstance;
     private static ChatgenConfig config;
-    private static WebView webView;
+    private static WebView myWebView;
     private int mCount;
     private TextView countView;
     private static BotEventListener botListener;
     private static BotEventListener localListener;
+    public WebviewOverlay wbo;
 
     public Chatgen(){
         this.botListener = botEvent -> {};
@@ -52,10 +59,10 @@ public class Chatgen {
 
     public void init(Context context, String s) {
         config = new ChatgenConfig(s);
-        config.webView = new WebviewOverlay();
         ConfigService.getInstance().setConfigData(config);
         Log.d("INIT", "copy assets");
         copyAssets(context);
+        loadWebview(context);
     }
 
     public void startChatbot(Context context) {
@@ -129,5 +136,42 @@ public class Chatgen {
         while((read = in.read(buffer)) != -1){
             out.write(buffer, 0, read);
         }
+    }
+
+    public void loadWebview(Context context){
+        myWebView = new WebView(context);
+
+        String widgetKey = ConfigService.getInstance().getConfig().widgetKey;
+        String yourFilePath = "file:///" + context.getFilesDir() + "/cg-widget/load.html";
+        File yourFile = new File( yourFilePath );
+        String botUrl = yourFile.toString();
+        botUrl += "?server=test&key=" + widgetKey;
+
+        myWebView.getSettings().setJavaScriptEnabled(true);
+        myWebView.getSettings().setSupportMultipleWindows(true);
+        myWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+        myWebView.getSettings().setAllowFileAccess(true);
+        myWebView.getSettings().setGeolocationDatabasePath(context.getFilesDir().getPath());
+        //Performance
+        myWebView.getSettings().setDomStorageEnabled(true);
+        myWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            myWebView.setWebContentsDebuggingEnabled(true);
+        }
+
+        myWebView.setWebViewClient(new WebViewClient());
+
+        myWebView.setWebChromeClient(new WebChromeClient() {
+
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                Log.d("WebViewConsoleMessage", consoleMessage.message());
+                return true;
+            }
+        });
+
+        Log.d("WebViewConsoleMessage", "URL = "+botUrl);
+        myWebView.loadUrl(botUrl);
     }
 }

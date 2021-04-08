@@ -27,7 +27,7 @@ window.ChatGen = (function () {
     else {
       iframe.style.height = '90vh';
       iframe.style.width = '400px';
-      if (posType.includes('middle')) {
+      if (posType && posType.includes('middle')) {
         iframe.style.bottom = '24px';
       }
     }
@@ -216,7 +216,7 @@ window.ChatGen = (function () {
       }
     },
 
-    openWidget: function () {
+    openChatWidget: function () {
       var _args = { type: 'openWidget', isChatgenLive: false };
       const url = window.location.href;
       const interactionLink = url.split('#');
@@ -228,7 +228,7 @@ window.ChatGen = (function () {
         iframeElement.contentWindow.postMessage(_args, '*');
       } else {
         setTimeout(() => {
-          this.openWidget()
+          this.openChatWidget()
         }, 500);
       }
     },
@@ -283,6 +283,9 @@ window.ChatGen = (function () {
             ? getCookie('active_chat_id')
             : '';
           _args.cookies = parent.document.cookie;
+          const urlParams = new URLSearchParams(window.location.search);
+          const interactionId = urlParams.get('interactionId');
+          _args.interactionId = interactionId;
           _args.isOpener = window.opener !== null;
           document.body.appendChild(iframe);
           const imageModal = document.createElement('div');
@@ -405,11 +408,13 @@ window.ChatGen = (function () {
                 isBotLoaded = true;
                 iframe.contentWindow.postMessage({ origin: 'cookies', cookies: cookies, args: e.data.args }, '*');
                 sendDimentions();
-                try{
-                  ChatgenHandler.botLoaded();
-                }catch(e){
-                  console.log(e);
-                }
+                ChatgenHandler.botLoaded();
+              }if (dataType === 'SOCKET_CONNECTED') {
+               try{
+//                 ChatgenHandler.botLoaded();
+               }catch(e){
+                 console.log(e);
+               }
               }
               else if (dataType === 'WIDGET_CLOSED'){
                 try{

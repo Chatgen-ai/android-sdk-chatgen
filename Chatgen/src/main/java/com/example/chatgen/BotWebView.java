@@ -1,7 +1,9 @@
 package com.example.chatgen;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -26,7 +28,6 @@ public class BotWebView extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         Chatgen.getInstance().setLocalListener(botEvent -> {
-            Log.d("botwebviewmohan", botEvent.getCode());
             switch (botEvent.getCode()){
                 case "closeBot" :
                     closeBot();
@@ -42,8 +43,6 @@ public class BotWebView extends AppCompatActivity {
         }
         catch (NullPointerException e){}
         setContentView(R.layout.bot_web_view);
-//        copyAssets();
-
         wb = new WebviewOverlay();
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().add(R.id.container, wb).commit();
