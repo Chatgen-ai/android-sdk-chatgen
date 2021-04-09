@@ -1,6 +1,5 @@
 package com.example.chatgen.models;
 
-import com.example.chatgen.Chatgen;
 import com.example.chatgen.ChatgenConfig;
 
 public class ConfigService {

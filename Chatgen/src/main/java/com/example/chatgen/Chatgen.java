@@ -10,17 +10,27 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.chatgen.models.ChatbotEventResponse;
 import com.example.chatgen.models.ConfigService;
-import com.example.chatgen.models.JavaScriptInterface;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.util.List;
 
 public class Chatgen {
 
@@ -29,11 +39,8 @@ public class Chatgen {
     private static Chatgen botPluginInstance;
     private static ChatgenConfig config;
     private static WebView myWebView;
-    private int mCount;
-    private TextView countView;
     private static BotEventListener botListener;
     private static BotEventListener localListener;
-    public WebviewOverlay wbo;
 
     public Chatgen(){
         this.botListener = botEvent -> {};
@@ -64,6 +71,7 @@ public class Chatgen {
         copyAssets(context);
         loadWebview(context);
     }
+
 
     public void startChatbot(Context context) {
         config.dialogId = "";

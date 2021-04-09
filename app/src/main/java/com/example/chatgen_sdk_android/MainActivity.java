@@ -1,23 +1,13 @@
 package com.example.chatgen_sdk_android;
 
 import android.os.Bundle;
-import android.os.Looper;
-import android.text.Layout;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.chatgen.Chatgen;
-import com.example.chatgen.ChatgenConfig;
-
-import java.sql.Time;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
     Chatgen chatgen;

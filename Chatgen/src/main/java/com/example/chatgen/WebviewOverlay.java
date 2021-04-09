@@ -1,13 +1,12 @@
 package com.example.chatgen;
 
-import android.app.Activity;
+import android.annotation.TargetApi;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,17 +14,13 @@ import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import com.example.chatgen.models.ChatbotEventResponse;
@@ -34,19 +29,17 @@ import com.example.chatgen.models.JavaScriptInterface;
 
 import java.io.File;
 
-import static android.app.Activity.RESULT_OK;
-
-public class WebviewOverlay extends Fragment {
+public class WebviewOverlay extends Fragment{
+    private static final int RESULT_OK = 1;
     private final String TAG = "ChatGenChat";
     private WebView myWebView;
-    private ValueCallback<Uri> mUploadMessage;
-    private Uri mCapturedImageURI = null;
-    private ValueCallback<Uri[]> mFilePathCallback;
-    private String mCameraPhotoPath;
     public long start;
     public long end = 0;
-    private static final int INPUT_FILE_REQUEST_CODE = 1;
-    private static final int FILECHOOSER_RESULTCODE = 1;
+
+    public ValueCallback<Uri[]> uploadMessage;
+    private ValueCallback<Uri> mUploadMessage;
+    public static final int REQUEST_SELECT_FILE = 100;
+    private final static int FILECHOOSER_RESULTCODE = 1;
 
     @Nullable
     @Override
@@ -55,65 +48,24 @@ public class WebviewOverlay extends Fragment {
         return myWebView;
     }
 
-    //File picker activity result
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if (requestCode != INPUT_FILE_REQUEST_CODE || mFilePathCallback == null) {
-                super.onActivityResult(requestCode, resultCode, data);
-                return;
-            }
-
-            Uri[] results = null;
-
-            // Check that the response is a good one
-            if (resultCode == Activity.RESULT_OK) {
-                if (data.getDataString() == null) {
-                    // If there is no data, then we may have taken a photo
-                    if (mCameraPhotoPath != null) {
-                        results = new Uri[]{Uri.parse(mCameraPhotoPath)};
-                    }
-                } else {
-                    String dataString = data.getDataString();
-                    if (dataString != null) {
-                        results = new Uri[]{Uri.parse(dataString)};
-                    }
-                }
-
-            }
-
-            mFilePathCallback.onReceiveValue(results);
-            mFilePathCallback = null;
-
-        } else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-            if (requestCode != FILECHOOSER_RESULTCODE || mUploadMessage == null) {
-                super.onActivityResult(requestCode, resultCode, data);
-                return;
-            }
-            if (requestCode == FILECHOOSER_RESULTCODE) {
-
-                if (null == this.mUploadMessage) {
+            if (requestCode == REQUEST_SELECT_FILE) {
+                if (uploadMessage == null)
                     return;
-                }
-                Uri result = null;
-                try {
-                    if (resultCode != RESULT_OK) {
-                        result = null;
-                    } else {
-                        // retrieve from the private variable if the intent is null
-                        result = data == null ? mCapturedImageURI : data.getData();
-                    }
-                } catch (Exception e) {
-                    Toast.makeText(getActivity(), "activity :" + e,
-                            Toast.LENGTH_LONG).show();
-                }
-                mUploadMessage.onReceiveValue(result);
-                mUploadMessage = null;
+                uploadMessage.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, intent));
+                uploadMessage = null;
             }
-        }
-        return;
+        } else if (requestCode == FILECHOOSER_RESULTCODE) {
+            if (null == mUploadMessage)
+                return;
+            Uri result = intent == null || resultCode != WebviewOverlay.RESULT_OK ? null : intent.getData();
+            mUploadMessage.onReceiveValue(result);
+            mUploadMessage = null;
+        } else
+            Toast.makeText(getContext(), "Failed to Upload Image", Toast.LENGTH_LONG).show();
     }
-
 
     public View preLoadWebView() {
         // Preload start
@@ -123,6 +75,7 @@ public class WebviewOverlay extends Fragment {
         myWebView.getSettings().setSupportMultipleWindows(true);
         myWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         myWebView.getSettings().setAllowFileAccess(true);
+        myWebView.getSettings().setAllowContentAccess(true);
         myWebView.getSettings().setGeolocationDatabasePath(context.getFilesDir().getPath());
         //Performance
         myWebView.getSettings().setDomStorageEnabled(true);
@@ -133,14 +86,62 @@ public class WebviewOverlay extends Fragment {
         }
         myWebView.addJavascriptInterface(new JavaScriptInterface((BotWebView) getActivity(), myWebView), "ChatgenHandler");
 
-        myWebView.setWebViewClient(new myWebClient());
+        myWebView.setWebViewClient(new WebViewClient());
 
-        myWebView.setWebChromeClient(new WebChromeClient() {
-
+        myWebView.setWebChromeClient(new WebChromeClient(){
             @Override
             public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
                 Log.d("WebViewConsoleMessage", consoleMessage.message());
                 return true;
+            }
+
+            // For 3.0+ Devices (Start)
+            // onActivityResult attached before constructor
+            protected void openFileChooser(ValueCallback uploadMsg, String acceptType) {
+                mUploadMessage = uploadMsg;
+                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+                i.addCategory(Intent.CATEGORY_OPENABLE);
+                i.setType("image/*");
+                startActivityForResult(Intent.createChooser(i, "File Chooser"), FILECHOOSER_RESULTCODE);
+            }
+
+
+            // For Lollipop 5.0+ Devices
+            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+            public boolean onShowFileChooser(WebView mWebView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+                if (uploadMessage != null) {
+                    uploadMessage.onReceiveValue(null);
+                    uploadMessage = null;
+                }
+
+                uploadMessage = filePathCallback;
+
+                Intent intent = fileChooserParams.createIntent();
+                try {
+                    startActivityForResult(intent, REQUEST_SELECT_FILE);
+                } catch (ActivityNotFoundException e) {
+                    uploadMessage = null;
+                    Toast.makeText(context, "Cannot Open File Chooser", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+                return true;
+            }
+
+            //For Android 4.1 only
+            protected void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
+                mUploadMessage = uploadMsg;
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("image/*");
+                startActivityForResult(Intent.createChooser(intent, "File Chooser"), FILECHOOSER_RESULTCODE);
+            }
+
+            protected void openFileChooser(ValueCallback<Uri> uploadMsg) {
+                mUploadMessage = uploadMsg;
+                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+                i.addCategory(Intent.CATEGORY_OPENABLE);
+                i.setType("image/*");
+                startActivityForResult(Intent.createChooser(i, "File Chooser"), FILECHOOSER_RESULTCODE);
             }
         });
         String widgetKey = ConfigService.getInstance().getConfig().widgetKey;
@@ -191,23 +192,5 @@ public class WebviewOverlay extends Fragment {
         });
     }
 
-    public class myWebClient extends WebViewClient {
-        @Override
-        public void onPageStarted(WebView view, String url, Bitmap favicon) {
-            super.onPageStarted(view, url, favicon);
-        }
-
-        @Override
-        public void onPageFinished(WebView view, String url) {
-            super.onPageFinished(view, url);
-        }
-
-        @RequiresApi(api = Build.VERSION_CODES.M)
-        @Override
-        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error){
-            //Your code to do
-            Toast.makeText(getActivity(), "Your Internet Connection May not be active Or " + error.getDescription(), Toast.LENGTH_LONG).show();
-        }
-    }
 }
 

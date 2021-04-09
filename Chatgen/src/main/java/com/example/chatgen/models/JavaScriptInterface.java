@@ -22,16 +22,6 @@ public class JavaScriptInterface {
     }
 
     @JavascriptInterface
-    public void  receiveMessage(String s) {
-        ChatbotEventResponse incomingEvent = new Gson().fromJson(s, ChatbotEventResponse.class);
-        // Pass-through events (Bot will not close)
-        Map<String, Object> retMap = new Gson().fromJson(
-                incomingEvent.data, new TypeToken<HashMap<String, Object>>() {}.getType());
-        Log.d("Event from Bot", "receiveMessage: "+incomingEvent.code);
-        Chatgen.getInstance().emitEvent(incomingEvent);
-    }
-
-    @JavascriptInterface
     public void closeBot() {
         parentActivity.runOnUiThread(new Runnable() {
             @Override
