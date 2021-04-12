@@ -1,6 +1,6 @@
-package com.example.chatgen;
+package com.chatgen.chatgen;
 
-import com.example.chatgen.models.ChatbotEventResponse;
+import com.chatgen.chatgen.models.ChatbotEventResponse;
 
 public interface BotEventListener {
     void onSuccess(ChatbotEventResponse botEvent);

@@ -1,4 +1,4 @@
-package com.example.chatgen;
+package com.chatgen.chatgen;
 
 public class ChatgenConfig {
     public String widgetKey;

@@ -1,4 +1,4 @@
-package com.example.chatgen_sdk_android;
+package com.chatgen.chatgen_sdk_android;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -7,7 +7,7 @@ import android.widget.FrameLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.chatgen.Chatgen;
+import com.chatgen.chatgen.Chatgen;
 
 public class MainActivity extends AppCompatActivity {
     Chatgen chatgen;

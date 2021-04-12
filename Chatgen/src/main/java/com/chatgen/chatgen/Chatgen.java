@@ -1,10 +1,8 @@
-package com.example.chatgen;
+package com.chatgen.chatgen;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.AssetManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
@@ -18,11 +16,9 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.chatgen.models.ChatbotEventResponse;
-import com.example.chatgen.models.ConfigService;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.chatgen.chatgen.models.ChatbotEventResponse;
+import com.chatgen.chatgen.models.ConfigService;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,10 +33,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.nio.file.Files;
-import java.util.List;
-import java.util.concurrent.Executor;
 
 public class Chatgen {
 
@@ -81,8 +73,8 @@ public class Chatgen {
         config = new ChatgenConfig(s);
         ConfigService.getInstance().setConfigData(config);
         Log.d("INIT", "copy assets");
-        loadWebview(context);
         getRemoteAssets(context);
+        loadWebview(context);
     }
 
     public void startChatbot(Context context) {
@@ -160,14 +152,13 @@ public class Chatgen {
                                             URL url = new URL(assetUrl);
                                             String filename = assetName.substring(assetName.lastIndexOf("/") +1);
                                             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                                            InputStream in = null;
+                                            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
                                             OutputStream out = null;
                                             try {
-                                                in = new BufferedInputStream(urlConnection.getInputStream());
-                                                String outDir = widgetDirectory;
-                                                File outFile = new File(outDir, filename);
+                                                File outFile = new File(widgetDirectory, filename);
                                                 out = new FileOutputStream(outFile);
                                                 copyFile(in, out);
+                                                Log.d("FileCopied", filename);
                                                 in.close();
                                                 in = null;
                                                 out.flush();

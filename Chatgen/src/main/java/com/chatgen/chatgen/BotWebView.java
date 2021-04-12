@@ -1,11 +1,11 @@
-package com.example.chatgen;
+package com.chatgen.chatgen;
 
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
-import com.example.chatgen.models.ChatbotEventResponse;
+import com.chatgen.chatgen.models.ChatbotEventResponse;
 
 public class BotWebView extends AppCompatActivity {
 

@@ -1,4 +1,4 @@
-package com.example.chatgen;
+package com.chatgen.chatgen;
 
 import android.annotation.TargetApi;
 import android.content.ActivityNotFoundException;
@@ -23,9 +23,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.chatgen.models.ChatbotEventResponse;
-import com.example.chatgen.models.ConfigService;
-import com.example.chatgen.models.JavaScriptInterface;
+import com.chatgen.chatgen.models.ChatbotEventResponse;
+import com.chatgen.chatgen.models.ConfigService;
+import com.chatgen.chatgen.models.JavaScriptInterface;
 
 import java.io.File;
 

@@ -1,16 +1,9 @@
-package com.example.chatgen.models;
+package com.chatgen.chatgen.models;
 
-import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
-import com.example.chatgen.BotWebView;
-import com.example.chatgen.Chatgen;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.chatgen.chatgen.BotWebView;
 
 public class JavaScriptInterface {
     protected BotWebView parentActivity;

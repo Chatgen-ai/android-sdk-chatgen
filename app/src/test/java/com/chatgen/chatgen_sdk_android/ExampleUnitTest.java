@@ -1,4 +1,4 @@
-package com.example.chatgen_sdk_android;
+package com.chatgen.chatgen_sdk_android;
 
 import org.junit.Test;
 
