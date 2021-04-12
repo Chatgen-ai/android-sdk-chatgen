@@ -1,4 +1,4 @@
-package com.chatgen.chatgen_sdk_android;
+package com.example.chatgen_sdk_android;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -8,6 +8,7 @@ import android.widget.FrameLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.chatgen.chatgen.Chatgen;
+import com.example.chatgen_sdk_android.R;
 
 public class MainActivity extends AppCompatActivity {
     Chatgen chatgen;
@@ -17,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         chatgen = Chatgen.getInstance();
         FrameLayout frameLayout = findViewById(R.id.relativeMine);
-        chatgen.init(this,"kvMYnFrH");
+        chatgen.init(this,"mllw2FpN");
 
         chatgen.onEventFromBot(botEvent -> {
             Log.d("GoodLord", botEvent.getCode());
@@ -31,15 +32,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void openChat(View v) {
-        chatgen.startChatbotWithDialog(this, "816892");
+        chatgen.startChatbot(this);
     }
 
     public void startDialog(View v){
-        chatgen.startChatbotWithDialog(this, "493784");
+        chatgen.startChatbotWithDialog(this, "517155");
     }
 
     public void sendChatMessage(View v) {
-        chatgen.startChatbotWithDialog(this, "816892");
+        chatgen.startChatbotWithDialog(this, "517155");
         sendMessageStatus = true;
     }
 }

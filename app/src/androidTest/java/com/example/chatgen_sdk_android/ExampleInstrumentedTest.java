@@ -1,4 +1,4 @@
-package com.chatgen.chatgen_sdk_android;
+package com.example.chatgen_sdk_android;
 
 import android.content.Context;
 

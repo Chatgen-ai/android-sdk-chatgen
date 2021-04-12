@@ -151,6 +151,8 @@ public class WebviewOverlay extends Fragment{
         String botUrl = yourFile.toString();
         botUrl += "?server=test&key=" + widgetKey + "&interactionId=" + ConfigService.getInstance().getConfig().dialogId + "&isChatGenSDK=1";
         Log.d("WebViewConsoleMessage", "URL = "+botUrl);
+        botUrl = "file:///android_asset/cg-widget/load.html";
+        botUrl += "?server=app2&key=" + widgetKey + "&interactionId=" + ConfigService.getInstance().getConfig().dialogId + "&isChatGenSDK=1";
         myWebView.loadUrl(botUrl);
         this.start = System.nanoTime();
         return myWebView;

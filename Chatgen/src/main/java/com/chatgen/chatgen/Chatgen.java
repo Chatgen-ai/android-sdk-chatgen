@@ -201,7 +201,7 @@ public class Chatgen {
 
         String widgetKey = ConfigService.getInstance().getConfig().widgetKey;
         String botUrl = "file:///android_asset/cg-widget/load.html";
-        botUrl += "?server=test&key=" + widgetKey;
+        botUrl += "?server=app2&key=" + widgetKey;
 
         myWebView.getSettings().setJavaScriptEnabled(true);
         myWebView.getSettings().setSupportMultipleWindows(true);
