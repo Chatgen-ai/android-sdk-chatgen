@@ -145,7 +145,8 @@ public class WebviewOverlay extends Fragment{
             }
         });
         String widgetKey = ConfigService.getInstance().getConfig().widgetKey;
-        String yourFilePath = "file:///" + context.getFilesDir() + "/cg-widget/load.html";
+        String widgetVersion = ConfigService.getInstance().getConfig().version;
+        String yourFilePath = "file:///" + context.getFilesDir() + "/cg-widget-"+widgetVersion+"/load.html";
         File yourFile = new File( yourFilePath );
         String botUrl = yourFile.toString();
         botUrl += "?server=test&key=" + widgetKey + "&interactionId=" + ConfigService.getInstance().getConfig().dialogId + "&isChatGenSDK=1";

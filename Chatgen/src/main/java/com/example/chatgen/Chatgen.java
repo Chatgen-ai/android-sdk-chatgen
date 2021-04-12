@@ -2,7 +2,9 @@ package com.example.chatgen;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
@@ -20,17 +22,25 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.chatgen.models.ChatbotEventResponse;
 import com.example.chatgen.models.ConfigService;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public class Chatgen {
 
@@ -41,6 +51,9 @@ public class Chatgen {
     private static WebView myWebView;
     private static BotEventListener botListener;
     private static BotEventListener localListener;
+    String url = "https://testapi.chatgen.ai/helper/getSDKMeta";
+    String baseUrl = "https://app.chatgen.ai/assets/";
+    String cgWidgetVersion = "cg-widget-version";
 
     public Chatgen(){
         this.botListener = botEvent -> {};
@@ -68,10 +81,9 @@ public class Chatgen {
         config = new ChatgenConfig(s);
         ConfigService.getInstance().setConfigData(config);
         Log.d("INIT", "copy assets");
-        copyAssets(context);
         loadWebview(context);
+        getRemoteAssets(context);
     }
-
 
     public void startChatbot(Context context) {
         config.dialogId = "";
@@ -105,37 +117,84 @@ public class Chatgen {
         }
     }
 
-    private void copyAssets(Context context) {
-        File myDir = new File(context.getFilesDir(), "cg-widget");
-        if(!myDir.isDirectory()){
-            myDir.mkdir();
-        }
-        String widgetDirectory = context.getFilesDir() + "/cg-widget";
-        AssetManager assetManager = context.getAssets();
-        String[] files = null;
-        try {
-            files = assetManager.list("cg-widget");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        for(String filename : files) {
-            InputStream in = null;
-            OutputStream out = null;
-            try {
-                in = assetManager.open("cg-widget/" +filename);
-                String outDir = widgetDirectory;
-                File outFile = new File(outDir, filename);
-                out = new FileOutputStream(outFile);
-                copyFile(in, out);
-                in.close();
-                in = null;
-                out.flush();
-                out.close();
-                out = null;
-            } catch(IOException e) {
-                Log.e("AssetCopyFailure", "Failed to copy asset file: " + filename, e);
+    public void getRemoteAssets(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences(cgWidgetVersion, Context.MODE_PRIVATE);
+        String defaultVersion = "";
+        String storedVersion = preferences.getString(cgWidgetVersion, defaultVersion);
+        config.version = storedVersion;
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+        JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        String currentVersion = null;
+                        try {
+                            currentVersion = (String) response.get("version");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        if(currentVersion.equals(storedVersion)){
+                            return;
+                        } else {
+                            String finalCurrentVersion = currentVersion;
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Display the first 500 characters of the response string.
+                                    try {
+                                        preferences.edit().putString(cgWidgetVersion, finalCurrentVersion).apply();
+                                        config.version = finalCurrentVersion;
+                                        String widgetDirectoryName = "cg-widget-"+ finalCurrentVersion;
+                                        Log.d("currentVersion", widgetDirectoryName);
+                                        File myDir = new File(context.getFilesDir(), widgetDirectoryName);
+                                        if(!myDir.isDirectory()){
+                                            myDir.mkdir();
+                                        }
+                                        String widgetDirectory = context.getFilesDir() + "/" + widgetDirectoryName;
+                                        JSONArray files;
+                                        files = (JSONArray) response.get("files");
+                                        for(int n=1; n < files.length(); n++){
+                                            String assetName = files.getString(n);
+                                            final String assetUrl = baseUrl + assetName;
+                                            URL url = new URL(assetUrl);
+                                            String filename = assetName.substring(assetName.lastIndexOf("/") +1);
+                                            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                                            InputStream in = null;
+                                            OutputStream out = null;
+                                            try {
+                                                in = new BufferedInputStream(urlConnection.getInputStream());
+                                                String outDir = widgetDirectory;
+                                                File outFile = new File(outDir, filename);
+                                                out = new FileOutputStream(outFile);
+                                                copyFile(in, out);
+                                                in.close();
+                                                in = null;
+                                                out.flush();
+                                                out.close();
+                                                out = null;
+                                            } catch(IOException e) {
+                                                Log.e("AssetCopyFailure", "Failed to copy asset file: " + filename, e);
+                                            }
+                                        }
+                                    } catch (JSONException | MalformedURLException e) {
+                                        Log.e("JSONException", e.getMessage());
+                                        e.printStackTrace();
+                                    } catch (IOException e) {
+                                        Log.e("IOException", e.getMessage());
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }).start();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
             }
-        }
+        });
+
+        queue.add(jsonRequest);
     }
 
     private void copyFile(InputStream in, OutputStream out) throws IOException {
@@ -150,9 +209,7 @@ public class Chatgen {
         myWebView = new WebView(context);
 
         String widgetKey = ConfigService.getInstance().getConfig().widgetKey;
-        String yourFilePath = "file:///" + context.getFilesDir() + "/cg-widget/load.html";
-        File yourFile = new File( yourFilePath );
-        String botUrl = yourFile.toString();
+        String botUrl = "file:///android_asset/cg-widget/load.html";
         botUrl += "?server=test&key=" + widgetKey;
 
         myWebView.getSettings().setJavaScriptEnabled(true);
@@ -183,3 +240,4 @@ public class Chatgen {
         myWebView.loadUrl(botUrl);
     }
 }
+
