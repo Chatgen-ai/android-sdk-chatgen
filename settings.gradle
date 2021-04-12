@@ -1,4 +1,3 @@
 include ':Chatgen'
-include ':app:Chatgen'
 include ':app'
 rootProject.name = "chatgen-sdk-android"
