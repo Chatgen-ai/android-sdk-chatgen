@@ -43,7 +43,7 @@ public class Chatgen {
     private static WebView myWebView;
     private static BotEventListener botListener;
     private static BotEventListener localListener;
-    String url = "https://testapi.chatgen.ai/helper/getSDKMeta";
+
     String baseUrl = "https://app.chatgen.ai/assets/";
     String cgWidgetVersion = "cg-widget-version";
 
@@ -110,6 +110,8 @@ public class Chatgen {
     }
 
     public void getRemoteAssets(Context context) {
+        String apiRoot = ConfigService.getInstance().getConfig().apiRoot;
+        String url = "https://"+apiRoot+".chatgen.ai/helper/getSDKMeta";
         SharedPreferences preferences = context.getSharedPreferences(cgWidgetVersion, Context.MODE_PRIVATE);
         String defaultVersion = "";
         String storedVersion = preferences.getString(cgWidgetVersion, defaultVersion);
@@ -135,8 +137,6 @@ public class Chatgen {
                                 public void run() {
                                     // Display the first 500 characters of the response string.
                                     try {
-                                        preferences.edit().putString(cgWidgetVersion, finalCurrentVersion).apply();
-                                        config.version = finalCurrentVersion;
                                         String widgetDirectoryName = "cg-widget-"+ finalCurrentVersion;
                                         Log.d("currentVersion", widgetDirectoryName);
                                         File myDir = new File(context.getFilesDir(), widgetDirectoryName);
@@ -168,6 +168,8 @@ public class Chatgen {
                                                 Log.e("AssetCopyFailure", "Failed to copy asset file: " + filename, e);
                                             }
                                         }
+                                        preferences.edit().putString(cgWidgetVersion, finalCurrentVersion).apply();
+                                        config.version = finalCurrentVersion;
                                     } catch (JSONException | MalformedURLException e) {
                                         Log.e("JSONException", e.getMessage());
                                         e.printStackTrace();
@@ -199,9 +201,10 @@ public class Chatgen {
     public void loadWebview(Context context){
         myWebView = new WebView(context);
 
+        String serverRoot = ConfigService.getInstance().getConfig().serverRoot;
         String widgetKey = ConfigService.getInstance().getConfig().widgetKey;
         String botUrl = "file:///android_asset/cg-widget/load.html";
-        botUrl += "?server=app2&key=" + widgetKey;
+        botUrl += "?server="+serverRoot+"&key=" + widgetKey;
 
         myWebView.getSettings().setJavaScriptEnabled(true);
         myWebView.getSettings().setSupportMultipleWindows(true);

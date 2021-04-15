@@ -144,15 +144,7 @@ public class WebviewOverlay extends Fragment{
                 startActivityForResult(Intent.createChooser(i, "File Chooser"), FILECHOOSER_RESULTCODE);
             }
         });
-        String widgetKey = ConfigService.getInstance().getConfig().widgetKey;
-        String widgetVersion = ConfigService.getInstance().getConfig().version;
-        String yourFilePath = "file:///" + context.getFilesDir() + "/cg-widget-"+widgetVersion+"/load.html";
-        File yourFile = new File( yourFilePath );
-        String botUrl = yourFile.toString();
-        botUrl += "?server=test&key=" + widgetKey + "&interactionId=" + ConfigService.getInstance().getConfig().dialogId + "&isChatGenSDK=1";
-        Log.d("WebViewConsoleMessage", "URL = "+botUrl);
-        botUrl = "file:///android_asset/cg-widget/load.html";
-        botUrl += "?server=app2&key=" + widgetKey + "&interactionId=" + ConfigService.getInstance().getConfig().dialogId + "&isChatGenSDK=1";
+        String botUrl = getBotUrl(context);
         myWebView.loadUrl(botUrl);
         this.start = System.nanoTime();
         return myWebView;
@@ -195,5 +187,20 @@ public class WebviewOverlay extends Fragment{
         });
     }
 
+    private String getBotUrl(Context context) {
+        String widgetKey = ConfigService.getInstance().getConfig().widgetKey;
+        String widgetVersion = ConfigService.getInstance().getConfig().version;
+        String serverRoot = ConfigService.getInstance().getConfig().serverRoot;
+        String interactionId = ConfigService.getInstance().getConfig().dialogId;
+        String configUrl = "?server=" + serverRoot + "&key=" + widgetKey + "&interactionId=" + interactionId + "&isChatGenSDK=1";
+        String botUrl = "file:///android_asset/cg-widget/load.html" + configUrl;
+        File widgetDir = new File(context.getFilesDir(), "cg-widget-"+widgetVersion);
+        if(widgetDir.isDirectory()){
+            String filePath = "file:///" + context.getFilesDir() + "/cg-widget-" + widgetVersion + "/load.html";
+            File yourFile = new File( filePath );
+            botUrl = yourFile.toString() + configUrl;
+        }
+        return botUrl;
+    }
 }
 
