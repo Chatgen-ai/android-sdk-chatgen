@@ -86,7 +86,7 @@ public class Chatgen {
     }
 
     public void startChatbotWithDialog(Context context, String dialogId) {
-        Log.d("WebViewConsoleMessage", "Start ChatBot with dialog");
+        Log.d("WebViewConsoleMessage", "Start ChatBot with dialog: " + dialogId);
         config.dialogId = dialogId;
         webViewContext = context;
         webViewIntent = new Intent(webViewContext, BotWebView.class);
@@ -113,7 +113,7 @@ public class Chatgen {
         String apiRoot = ConfigService.getInstance().getConfig().apiRoot;
         String url = "https://"+apiRoot+".chatgen.ai/helper/getSDKMeta";
         SharedPreferences preferences = context.getSharedPreferences(cgWidgetVersion, Context.MODE_PRIVATE);
-        String defaultVersion = "";
+        String defaultVersion = "1.0.1";
         String storedVersion = preferences.getString(cgWidgetVersion, defaultVersion);
         config.version = storedVersion;
 
