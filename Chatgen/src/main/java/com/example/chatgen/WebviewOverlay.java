@@ -7,11 +7,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
+import android.webkit.CookieManager;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -71,6 +74,11 @@ public class WebviewOverlay extends Fragment{
         // Preload start
         final Context context = getActivity();
         myWebView = new WebView(context);
+        if (Build.VERSION.SDK_INT >= 21) {
+            CookieManager.getInstance().setAcceptThirdPartyCookies(myWebView, true);
+        } else {
+            CookieManager.getInstance().setAcceptCookie(true);
+        }
         myWebView.getSettings().setJavaScriptEnabled(true);
         myWebView.getSettings().setSupportMultipleWindows(true);
         myWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
@@ -85,8 +93,35 @@ public class WebviewOverlay extends Fragment{
             myWebView.setWebContentsDebuggingEnabled(true);
         }
         myWebView.addJavascriptInterface(new JavaScriptInterface((BotWebView) getActivity(), myWebView), "ChatgenHandler");
+        CookieManager cookieManager = CookieManager.getInstance();
 
-        myWebView.setWebViewClient(new WebViewClient());
+        cookieManager.setAcceptCookie(true);
+        cookieManager.acceptCookie();
+        cookieManager.setAcceptFileSchemeCookies(true);
+        cookieManager.getInstance().setAcceptCookie(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            CookieManager.getInstance().setAcceptThirdPartyCookies(myWebView, true);
+        }
+
+
+        myWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                Log.d("WebViewConsoleMessage", "on page finished ========>");
+                new Handler(Looper.getMainLooper()).postDelayed(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                boolean aid = CookieManager.getInstance().hasCookies();
+                                String foo = cookieManager.getCookie("file:///android_asset/cg-widget/index.html");
+                                Log.d("WebViewConsoleMessage", "doesIt: " + aid + " foo: " + foo + " at: " + myWebView.getUrl());
+                            }
+                        },
+                        7000
+                );
+            }
+        });
 
         myWebView.setWebChromeClient(new WebChromeClient(){
             @Override
@@ -146,10 +181,11 @@ public class WebviewOverlay extends Fragment{
         });
         String widgetKey = ConfigService.getInstance().getConfig().widgetKey;
         String widgetVersion = ConfigService.getInstance().getConfig().version;
-        String yourFilePath = "file:///" + context.getFilesDir() + "/cg-widget-"+widgetVersion+"/load.html";
+//        String yourFilePath = "file:///" + context.getFilesDir() + "/cg-widget-"+widgetVersion+"/load.html";
+        String yourFilePath = "file:///android_asset/cg-widget/load.html";
         File yourFile = new File( yourFilePath );
         String botUrl = yourFile.toString();
-        botUrl += "?server=test&key=" + widgetKey + "&interactionId=" + ConfigService.getInstance().getConfig().dialogId + "&isChatGenSDK=1";
+        botUrl += "?server=app2&key=" + widgetKey + "&interactionId=" + ConfigService.getInstance().getConfig().dialogId + "&isChatGenSDK=1";
         Log.d("WebViewConsoleMessage", "URL = "+botUrl);
         myWebView.loadUrl(botUrl);
         this.start = System.nanoTime();

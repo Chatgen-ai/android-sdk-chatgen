@@ -19,8 +19,7 @@
             }
           }
           window.chatgenSettings = chatgenSettings;
-          console.log('this: ', new URLSearchParams(window.location.search).get('server'))
-          s.src = './bot.js';
+          s.src = './sdkBot.js';
           var fs = document.getElementsByTagName("script")[0];
           fs.parentNode.insertBefore(s, fs);
           s.onload = function () {

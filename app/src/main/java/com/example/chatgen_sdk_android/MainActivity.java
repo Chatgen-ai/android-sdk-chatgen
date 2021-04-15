@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         chatgen = Chatgen.getInstance();
         FrameLayout frameLayout = findViewById(R.id.relativeMine);
-        chatgen.init(this,"kvMYnFrH");
+        chatgen.init(this,"mllw2FpN");
 
         chatgen.onEventFromBot(botEvent -> {
             Log.d("GoodLord", botEvent.getCode());
@@ -31,15 +31,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void openChat(View v) {
-        chatgen.startChatbotWithDialog(this, "816892");
+        chatgen.startChatbotWithDialog(this, "");
     }
 
     public void startDialog(View v){
-        chatgen.startChatbotWithDialog(this, "493784");
+        chatgen.startChatbotWithDialog(this, "517155");
     }
 
     public void sendChatMessage(View v) {
-        chatgen.startChatbotWithDialog(this, "816892");
+        chatgen.startChatbotWithDialog(this, "634854");
         sendMessageStatus = true;
     }
 }

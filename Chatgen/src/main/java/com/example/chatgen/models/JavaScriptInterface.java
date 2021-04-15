@@ -1,6 +1,8 @@
 package com.example.chatgen.models;
 
+import android.os.Build;
 import android.util.Log;
+import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
@@ -15,10 +17,30 @@ import java.util.Map;
 public class JavaScriptInterface {
     protected BotWebView parentActivity;
     protected WebView mWebView;
+    protected CookieManager cookieManager;
 
     public JavaScriptInterface(BotWebView _activity, WebView _webView)  {
         parentActivity = _activity;
         mWebView = _webView;
+        cookieManager = CookieManager.getInstance();
+    }
+
+    @JavascriptInterface
+    public String getCookie() {
+        Log.d("WebViewConsoleMessage", "get cookie: " + cookieManager.getCookie("https://foo.com"));
+        return cookieManager.getCookie("https://foo.com");
+    }
+
+    @JavascriptInterface
+    public void setCookie(String value) {
+        parentActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d("WebViewConsoleMessage", "set cookie: " + value);
+                cookieManager.setCookie("https://foo.com", value);
+                String result = cookieManager.getCookie("https://foo.com");
+            }
+        });
     }
 
     @JavascriptInterface
