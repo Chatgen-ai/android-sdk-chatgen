@@ -4,12 +4,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
+import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import androidx.annotation.RequiresApi;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -20,12 +27,14 @@ import com.android.volley.toolbox.Volley;
 import com.chatgen.chatgen.models.ChatbotEventResponse;
 import com.chatgen.chatgen.models.ConfigService;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +42,10 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.Executor;
+
+import static com.chatgen.chatgen.WebviewOverlay.readFromCacheSync;
+import static com.chatgen.chatgen.WebviewResourceMappingHelper.getWebResourceResponseFromAsset;
 
 public class Chatgen {
 
@@ -73,8 +86,15 @@ public class Chatgen {
         config = new ChatgenConfig(s);
         ConfigService.getInstance().setConfigData(config);
         Log.d("INIT", "copy assets");
-        getRemoteAssets(context);
-        loadWebview(context);
+//        getRemoteAssets(context);
+
+//        new android.os.Handler(Looper.getMainLooper()).postDelayed(
+//            new Runnable() {
+//                public void run() {
+//                    loadWebview(context);
+//                    Log.i("tag", "This'll run 300 milliseconds later");
+//                }
+//            }, 50);
     }
 
     public void startChatbot(Context context) {
@@ -219,13 +239,60 @@ public class Chatgen {
             myWebView.setWebContentsDebuggingEnabled(true);
         }
 
-        myWebView.setWebViewClient(new WebViewClient());
+        myWebView.setWebViewClient(new WebViewClient() {
+
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                String resourceUrl = request.getUrl().toString();
+                Log.d("Printing REsourceurl", resourceUrl);
+                String fileExtension = WebviewResourceMappingHelper.getInstance().getFileExt(resourceUrl);
+                if(WebviewResourceMappingHelper.getInstance().getOverridableExtensions().contains(fileExtension)){
+                    String encoding = "UTF-8";
+                    String assetName = WebviewResourceMappingHelper.getInstance().getLocalAssetPath(resourceUrl);
+                    Log.d("AssetName", assetName);
+                    if (StringUtils.isNotEmpty(assetName)) {
+                        String mimeType = WebviewResourceMappingHelper.getInstance().getMimeType(fileExtension);
+                        if (StringUtils.isNotEmpty(mimeType)) {
+                            try {
+                                return getWebResourceResponseFromAsset(assetName, mimeType, encoding, context);
+                            } catch (IOException e) {
+                                return super.shouldInterceptRequest(view, request);
+                            }
+                        }
+                    }
+                    String localFilePath = WebviewResourceMappingHelper.getInstance().getLocalFilePath(resourceUrl, context);
+                    if (StringUtils.isNotEmpty(localFilePath)) {
+                        String mimeType = WebviewResourceMappingHelper.getInstance().getMimeType(fileExtension);
+                        if(StringUtils.isNotEmpty(mimeType)){
+                            try {
+                                return WebviewResourceMappingHelper.getWebResourceResponseFromFile(localFilePath, mimeType, encoding);
+                            } catch (FileNotFoundException e) {
+                                return super.shouldInterceptRequest(view,request);
+                            }
+                        }
+                    }
+                }
+                if (fileExtension.endsWith("jpg")) {
+                    try {
+                        InputStream inputStream = readFromCacheSync(resourceUrl);
+                        if (inputStream != null) {
+                            return new WebResourceResponse("image/jpg", "UTF-8", inputStream);
+                        }
+                    } catch (Exception e) {
+                        return super.shouldInterceptRequest(view,request);
+                    }
+                }
+                return super.shouldInterceptRequest(view,request);
+            }
+
+        });
 
         myWebView.setWebChromeClient(new WebChromeClient() {
 
             @Override
             public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-                Log.d("WebViewConsoleMessage", consoleMessage.message());
+                Log.d("PreloadWebviewConsole", consoleMessage.message());
                 return true;
             }
         });

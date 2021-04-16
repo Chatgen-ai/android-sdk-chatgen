@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void sendChatMessage(View v) {
-        chatgen.startChatbotWithDialog(this, "634854");
+        chatgen.startChatbotWithDialog(this, "");
         sendMessageStatus = true;
     }
 }

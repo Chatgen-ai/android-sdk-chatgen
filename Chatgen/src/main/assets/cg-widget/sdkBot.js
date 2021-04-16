@@ -33,19 +33,23 @@ function getWithExpiry (key) {
 var cookies;
 
 function setCookies () {
-  if (ChatgenHandler) {
-    var myCookies = '';
-    var chatgen_aid = getWithExpiry('chatgen_aid');
-    if (chatgen_aid) {
-      myCookies += 'chatgen_aid=' + chatgen_aid + ';';
+  try{
+    if (ChatgenHandler) {
+      var myCookies = '';
+      var chatgen_aid = getWithExpiry('chatgen_aid');
+      if (chatgen_aid) {
+        myCookies += 'chatgen_aid=' + chatgen_aid + ';';
+      }
+      console.log('found chatgen_aid: ', chatgen_aid);
+      var SESSION = 'chatgen-session-cookie-id';
+      var session_id = getWithExpiry(SESSION);
+      if (session_id) {
+        myCookies += SESSION + '=' + session_id + ';';
+      }
+      cookies = myCookies;
     }
-    console.log('found chatgen_aid: ', chatgen_aid);
-    var SESSION = 'chatgen-session-cookie-id';
-    var session_id = getWithExpiry(SESSION);
-    if (session_id) {
-      myCookies += SESSION + '=' + session_id + ';';
-    }
-    cookies = myCookies;
+  }catch(e){
+    console.log("ChatGenHandler was not there");
   }
 }
 
@@ -438,7 +442,11 @@ window.ChatGen = (function () {
                 var expiry = split[1].split('=')[1];
                 var expiryDate = new Date(expiry);
                 console.log('key: ', name, ' val: ', value, ' expiry: ', expiryDate);
-                ChatgenHandler.setCookie(data.value);
+                try{
+                  ChatgenHandler.setCookie(data.value);
+                } catch(e) {
+                  console.log("ChatgenHandler not there.");
+                }
                 setWithExpiry(name, value, expiryDate.getTime() - (new Date().getTime()));
                 parent.document.cookie = data.value;
               }
@@ -446,12 +454,16 @@ window.ChatGen = (function () {
                 isBotLoaded = true;
                 iframe.contentWindow.postMessage({ origin: 'cookies', cookies: cookies, args: e.data.args }, '*');
                 sendDimentions();
-                ChatgenHandler.botLoaded();
+                try{
+                  ChatgenHandler.botLoaded();
+                }catch(e){
+                  console.log("ChatgenHandler");
+                }
               } else if (dataType === 'WIDGET_CLOSED') {
-                try {
+                try{
                   ChatgenHandler.closeBot();
-                } catch (e) {
-                  console.log(e);
+                } catch(e) {
+                  console.log("");  
                 }
               } else if (
                 dataType === 'NOTIFICATION_ON' ||

@@ -1,5 +1,6 @@
 package com.chatgen.chatgen;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -17,6 +18,8 @@ import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -24,13 +27,31 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import com.chatgen.chatgen.models.ChatbotEventResponse;
 import com.chatgen.chatgen.models.ConfigService;
 import com.chatgen.chatgen.models.JavaScriptInterface;
+import com.facebook.binaryresource.BinaryResource;
+import com.facebook.cache.common.CacheKey;
+import com.facebook.cache.disk.FileCache;
+import com.facebook.common.logging.FLog;
+import com.facebook.common.memory.PooledByteBuffer;
+import com.facebook.imagepipeline.cache.DefaultCacheKeyFactory;
+import com.facebook.imagepipeline.cache.StagingArea;
+import com.facebook.imagepipeline.core.ImagePipelineFactory;
+import com.facebook.imagepipeline.image.EncodedImage;
+import com.facebook.imagepipeline.request.ImageRequest;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class WebviewOverlay extends Fragment{
     private static final int RESULT_OK = 1;
@@ -105,6 +126,52 @@ public class WebviewOverlay extends Fragment{
 
 
         myWebView.setWebViewClient(new WebViewClient() {
+
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                String resourceUrl = request.getUrl().toString();
+                String fileExtension = WebviewResourceMappingHelper.getInstance().getFileExt(resourceUrl);
+                if(WebviewResourceMappingHelper.getInstance().getOverridableExtensions().contains(fileExtension)){
+                    String encoding = "UTF-8";
+                    String assetName = WebviewResourceMappingHelper.getInstance().getLocalAssetPath(resourceUrl);
+                    if (StringUtils.isNotEmpty(assetName)) {
+                        String mimeType = WebviewResourceMappingHelper.getInstance().getMimeType(fileExtension);
+                        if (StringUtils.isNotEmpty(mimeType)) {
+                            try {
+                                Log.e(TAG, assetName);
+                                return getWebResourceResponseFromAsset(assetName, mimeType, encoding, context);
+                            } catch (IOException e) {
+                                return super.shouldInterceptRequest(view, request);
+                            }
+                        }
+                    }
+                    String localFilePath = WebviewResourceMappingHelper.getInstance().getLocalFilePath(resourceUrl, context);
+                    if (StringUtils.isNotEmpty(localFilePath)) {
+                        String mimeType = WebviewResourceMappingHelper.getInstance().getMimeType(fileExtension);
+                        if(StringUtils.isNotEmpty(mimeType)){
+                            try {
+                                Log.e(TAG, localFilePath);
+                                return WebviewResourceMappingHelper.getWebResourceResponseFromFile(localFilePath, mimeType, encoding);
+                            } catch (FileNotFoundException e) {
+                                return super.shouldInterceptRequest(view,request);
+                            }
+                        }
+                    }
+                }
+                if (fileExtension.endsWith("jpg")) {
+                    try {
+                        InputStream inputStream = readFromCacheSync(resourceUrl);
+                        if (inputStream != null) {
+                            return new WebResourceResponse("image/jpg", "UTF-8", inputStream);
+                        }
+                    } catch (Exception e) {
+                        return super.shouldInterceptRequest(view,request);
+                    }
+                }
+                return super.shouldInterceptRequest(view,request);
+            }
+
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
@@ -124,9 +191,10 @@ public class WebviewOverlay extends Fragment{
         });
 
         myWebView.setWebChromeClient(new WebChromeClient(){
+            @SuppressLint("LongLogTag")
             @Override
             public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-                Log.d("WebViewConsoleMessage", consoleMessage.message());
+                Log.d("WebViewConsoleMessage- Line- " + consoleMessage.lineNumber(), consoleMessage.message());
                 return true;
             }
 
@@ -235,7 +303,52 @@ public class WebviewOverlay extends Fragment{
             File yourFile = new File( filePath );
             botUrl = yourFile.toString() + configUrl;
         }
+        botUrl = "https://app.yellowmessenger.com/components/public/webviews/mobile-sdk/index.html?botId=x1587041004122&enableHistory=true&ymAuthenticationToken=&deviceToken=&ym.payload=%7B%22some-key%22%3A%22some-value%22%2C%22platform%22%3A%22Android-App%22%7D";
         return botUrl;
     }
-}
 
+
+    public WebResourceResponse getWebResourceResponseFromAsset(String assetPath, String mimeType, String encoding, Context context) throws IOException {
+        InputStream inputStream =  getActivity().getAssets().open(assetPath);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            int statusCode = 200;
+            String reasonPhase = "OK";
+            Map<String, String> responseHeaders = new HashMap<String, String>();
+            responseHeaders.put("Access-Control-Allow-Origin", "*");
+            return new WebResourceResponse(mimeType, encoding, statusCode, reasonPhase, responseHeaders, inputStream);
+        }
+        return new WebResourceResponse(mimeType, encoding, inputStream);
+    }
+
+    public static InputStream readFromCacheSync(String imageUrl) {
+        CacheKey cacheKey = DefaultCacheKeyFactory.getInstance().getEncodedCacheKey(ImageRequest.fromUri(imageUrl), null);
+        StagingArea stagingArea = StagingArea.getInstance();
+        EncodedImage encodedImage = stagingArea.get(cacheKey);
+        if (encodedImage != null) {
+            return encodedImage.getInputStream();
+        }
+
+        try {
+            return readFromDiskCache(cacheKey);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static InputStream readFromDiskCache(final CacheKey key) throws IOException {
+        try {
+            FileCache fileCache = ImagePipelineFactory.getInstance().getMainFileCache();
+            final BinaryResource diskCacheResource = fileCache.getResource(key);
+            if (diskCacheResource == null) {
+                FLog.v("Webviewconsole", "Disk cache miss for %s", key.toString());
+                return null;
+            }
+            PooledByteBuffer byteBuffer;
+            final InputStream is = diskCacheResource.openStream();
+            FLog.v("Webviewconsole", "Successful read from disk cache for %s", key.toString());
+            return is;
+        } catch (IOException ioe) {
+            return null;
+        }
+    }
+}
