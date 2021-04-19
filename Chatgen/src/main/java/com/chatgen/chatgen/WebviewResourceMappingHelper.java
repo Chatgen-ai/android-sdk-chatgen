@@ -42,20 +42,9 @@ public class WebviewResourceMappingHelper {
     }
 
     public String getLocalAssetPath(String url){
-        Log.d("LocalAssetPath: ", url);
         if(StringUtils.isEmpty(url)){
             return "";
         }
-//        if(localAssetMapModelList == null){
-//            localAssetMapModelList = getLocalAssetList();
-//        }
-//        if(CollectionUtils.isNotEmpty(localAssetMapModelList)){
-//            for(LocalAssetMapModel localAssetMapModel : localAssetMapModelList){
-//                if(localAssetMapModel.url.equals(url)){
-//                    return localAssetMapModel.asset_url;
-//                }
-//            }
-//        }
         return url;
     }
 
@@ -85,33 +74,6 @@ public class WebviewResourceMappingHelper {
     private String getFileFullPath(String relativePath, Context context){
         return context.getFilesDir() + "/cg-widget/" + relativePath;
     }
-
-//    private List<LocalAssetMapModel> getLocalAssetList(){
-//        List<LocalAssetMapModel> localAssetMapModelList = new ArrayList<>();
-//        String pageData = null;
-//        try {
-//            pageData = ResourceAccessHelper.getJsonData(Application.getCurrentInstance(), "web-assets/map.json");
-//        } catch (IOException e) {
-//        }
-//        if(pageData !=null){
-//            Type listType = new TypeToken<ArrayList<LocalAssetMapModel>>() {
-//            }.getType();
-//            localAssetMapModelList = new Gson().fromJson(pageData,listType);
-//        }
-//
-//        pageData = null;
-//        try {
-//            pageData = ResourceAccessHelper.getJsonData(Application.getCurrentInstance(), "web-assets/fonts-map.json");
-//        } catch (IOException e) {
-//        }
-//        if(pageData !=null){
-//            Type listType = new TypeToken<ArrayList<LocalAssetMapModel>>() {
-//            }.getType();
-//            List<LocalAssetMapModel> fontsMap = new Gson().fromJson(pageData,listType);
-//            localAssetMapModelList.addAll(fontsMap);
-//        }
-//        return localAssetMapModelList;
-//    }
 
     public List<String> getOverridableExtensions(){
         return overridableExtensions;

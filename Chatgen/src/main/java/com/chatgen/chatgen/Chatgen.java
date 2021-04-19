@@ -85,16 +85,13 @@ public class Chatgen {
     public void init(Context context, String s) {
         config = new ChatgenConfig(s);
         ConfigService.getInstance().setConfigData(config);
-        Log.d("INIT", "copy assets");
-//        getRemoteAssets(context);
-
-//        new android.os.Handler(Looper.getMainLooper()).postDelayed(
-//            new Runnable() {
-//                public void run() {
-//                    loadWebview(context);
-//                    Log.i("tag", "This'll run 300 milliseconds later");
-//                }
-//            }, 50);
+        getRemoteAssets(context);
+        new android.os.Handler(Looper.getMainLooper()).postDelayed(
+            new Runnable() {
+                public void run() {
+                    loadWebview(context);
+                }
+            }, 50);
     }
 
     public void startChatbot(Context context) {
@@ -106,7 +103,6 @@ public class Chatgen {
     }
 
     public void startChatbotWithDialog(Context context, String dialogId) {
-        Log.d("WebViewConsoleMessage", "Start ChatBot with dialog: " + dialogId);
         config.dialogId = dialogId;
         webViewContext = context;
         webViewIntent = new Intent(webViewContext, BotWebView.class);
@@ -158,7 +154,6 @@ public class Chatgen {
                                     // Display the first 500 characters of the response string.
                                     try {
                                         String widgetDirectoryName = "cg-widget-"+ finalCurrentVersion;
-                                        Log.d("currentVersion", widgetDirectoryName);
                                         File myDir = new File(context.getFilesDir(), widgetDirectoryName);
                                         if(!myDir.isDirectory()){
                                             myDir.mkdir();
@@ -178,7 +173,6 @@ public class Chatgen {
                                                 File outFile = new File(widgetDirectory, filename);
                                                 out = new FileOutputStream(outFile);
                                                 copyFile(in, out);
-                                                Log.d("FileCopied", filename);
                                                 in.close();
                                                 in = null;
                                                 out.flush();
@@ -245,12 +239,10 @@ public class Chatgen {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 String resourceUrl = request.getUrl().toString();
-                Log.d("Printing REsourceurl", resourceUrl);
                 String fileExtension = WebviewResourceMappingHelper.getInstance().getFileExt(resourceUrl);
                 if(WebviewResourceMappingHelper.getInstance().getOverridableExtensions().contains(fileExtension)){
                     String encoding = "UTF-8";
                     String assetName = WebviewResourceMappingHelper.getInstance().getLocalAssetPath(resourceUrl);
-                    Log.d("AssetName", assetName);
                     if (StringUtils.isNotEmpty(assetName)) {
                         String mimeType = WebviewResourceMappingHelper.getInstance().getMimeType(fileExtension);
                         if (StringUtils.isNotEmpty(mimeType)) {
@@ -296,8 +288,6 @@ public class Chatgen {
                 return true;
             }
         });
-
-        Log.d("WebViewConsoleMessage", "URL = "+botUrl);
         myWebView.loadUrl(botUrl);
     }
 }

@@ -175,7 +175,6 @@ public class WebviewOverlay extends Fragment{
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                Log.d("WebViewConsoleMessage", "on page finished ========>");
                 new Handler(Looper.getMainLooper()).postDelayed(
                         new Runnable() {
                             @Override
@@ -279,11 +278,9 @@ public class WebviewOverlay extends Fragment{
             @Override
             public void run() {
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    Log.d("SendingMessageScript", jsScript);
                     myWebView.evaluateJavascript(jsScript, null);
                 }
                 else {
-                    Log.d("SendingMessageScript2", jsScript);
                     myWebView.loadUrl(jsScript);
                 }
             }
@@ -303,7 +300,6 @@ public class WebviewOverlay extends Fragment{
             File yourFile = new File( filePath );
             botUrl = yourFile.toString() + configUrl;
         }
-        botUrl = "https://app.yellowmessenger.com/components/public/webviews/mobile-sdk/index.html?botId=x1587041004122&enableHistory=true&ymAuthenticationToken=&deviceToken=&ym.payload=%7B%22some-key%22%3A%22some-value%22%2C%22platform%22%3A%22Android-App%22%7D";
         return botUrl;
     }
 

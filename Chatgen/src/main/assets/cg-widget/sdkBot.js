@@ -40,7 +40,6 @@ function setCookies () {
       if (chatgen_aid) {
         myCookies += 'chatgen_aid=' + chatgen_aid + ';';
       }
-      console.log('found chatgen_aid: ', chatgen_aid);
       var SESSION = 'chatgen-session-cookie-id';
       var session_id = getWithExpiry(SESSION);
       if (session_id) {
@@ -299,14 +298,13 @@ window.ChatGen = (function () {
             console.log('return bhai ek bar hai');
             return;
           }
-          console.log('inject iframe');
+          console.log('Inject iframe');
           setCookies();
           loaded = true;
           window.ChatGen.loaded = true;
           const iframe = document.createElement('iframe');
           iframe.id = 'selekt-chat-widget';
           iframe.src = './index.html';
-          console.log('iframe', iframe.src);
           iframe.style =
               'display: block; bottom: unset; left: unset; right: unset; top: unset; border: none; min-width: unset; min-height: unset; position: fixed;visibility:hidden;border: 0px;z-index:9999999999;margin: 0px;padding: 0px;background: none; width:0px;height:0px';
           _args.ip_data = '';
@@ -354,7 +352,7 @@ window.ChatGen = (function () {
 
           // For a new iframe, emit event to iframe
           iframe.onload = function () {
-            console.log('iframeonload');
+            console.log('Iframe Onload');
             iframe.contentWindow.postMessage(_args, '*');
             window.chatgenLoaded = true;
           };
@@ -435,13 +433,11 @@ window.ChatGen = (function () {
               }
               if (dataType === 'SET_COOKIE' || dataType === 'ERASE_COOKIE') {
                 document.cookie = data.value;
-                console.log('SET: ', data.value);
                 var split = data.value.split(';');
                 var name = split[0].split('=')[0];
                 var value = split[0].split('=')[1];
                 var expiry = split[1].split('=')[1];
                 var expiryDate = new Date(expiry);
-                console.log('key: ', name, ' val: ', value, ' expiry: ', expiryDate);
                 try{
                   ChatgenHandler.setCookie(data.value);
                 } catch(e) {
@@ -457,13 +453,13 @@ window.ChatGen = (function () {
                 try{
                   ChatgenHandler.botLoaded();
                 }catch(e){
-                  console.log("ChatgenHandler");
+                  console.log("ChatgenHandler not there");
                 }
               } else if (dataType === 'WIDGET_CLOSED') {
                 try{
                   ChatgenHandler.closeBot();
                 } catch(e) {
-                  console.log("");  
+                  console.log("ChatgenHandler not there");  
                 }
               } else if (
                 dataType === 'NOTIFICATION_ON' ||
