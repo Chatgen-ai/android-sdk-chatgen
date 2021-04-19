@@ -297,8 +297,11 @@ public class WebviewOverlay extends Fragment{
         File widgetDir = new File(context.getFilesDir(), "cg-widget-"+widgetVersion);
         if(widgetDir.isDirectory()){
             String filePath = "file:///" + context.getFilesDir() + "/cg-widget-" + widgetVersion + "/load.html";
-            File yourFile = new File( filePath );
-            botUrl = yourFile.toString() + configUrl;
+            Log.d("WebviewConsoleFP: ", filePath);
+            File loadFile = new File( filePath );
+            if(loadFile.exists()){
+                botUrl = loadFile.toString() + configUrl;
+            }
         }
         return botUrl;
     }

@@ -57,7 +57,7 @@ public class Chatgen {
     private static BotEventListener botListener;
     private static BotEventListener localListener;
 
-    String baseUrl = "https://app.chatgen.ai/assets/";
+    String baseUrl = "https://storage.googleapis.com/chatgen-static-files/";
     String cgWidgetVersion = "cg-widget-version";
 
     public Chatgen(){
@@ -129,7 +129,7 @@ public class Chatgen {
         String apiRoot = ConfigService.getInstance().getConfig().apiRoot;
         String url = "https://"+apiRoot+".chatgen.ai/helper/getSDKMeta";
         SharedPreferences preferences = context.getSharedPreferences(cgWidgetVersion, Context.MODE_PRIVATE);
-        String defaultVersion = "1.0.1";
+        String defaultVersion = "";
         String storedVersion = preferences.getString(cgWidgetVersion, defaultVersion);
         config.version = storedVersion;
 
@@ -161,7 +161,7 @@ public class Chatgen {
                                         String widgetDirectory = context.getFilesDir() + "/" + widgetDirectoryName;
                                         JSONArray files;
                                         files = (JSONArray) response.get("files");
-                                        for(int n=1; n < files.length(); n++){
+                                        for(int n=0; n < files.length(); n++){
                                             String assetName = files.getString(n);
                                             final String assetUrl = baseUrl + assetName;
                                             URL url = new URL(assetUrl);
@@ -173,6 +173,7 @@ public class Chatgen {
                                                 File outFile = new File(widgetDirectory, filename);
                                                 out = new FileOutputStream(outFile);
                                                 copyFile(in, out);
+                                                Log.d("webviewconsole", filename);
                                                 in.close();
                                                 in = null;
                                                 out.flush();
