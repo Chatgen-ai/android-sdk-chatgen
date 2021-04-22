@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -139,7 +140,6 @@ public class WebviewOverlay extends Fragment{
                         String mimeType = WebviewResourceMappingHelper.getInstance().getMimeType(fileExtension);
                         if (StringUtils.isNotEmpty(mimeType)) {
                             try {
-                                Log.e(TAG, assetName);
                                 return getWebResourceResponseFromAsset(assetName, mimeType, encoding, context);
                             } catch (IOException e) {
                                 return super.shouldInterceptRequest(view, request);
@@ -151,7 +151,6 @@ public class WebviewOverlay extends Fragment{
                         String mimeType = WebviewResourceMappingHelper.getInstance().getMimeType(fileExtension);
                         if(StringUtils.isNotEmpty(mimeType)){
                             try {
-                                Log.e(TAG, localFilePath);
                                 return WebviewResourceMappingHelper.getWebResourceResponseFromFile(localFilePath, mimeType, encoding);
                             } catch (FileNotFoundException e) {
                                 return super.shouldInterceptRequest(view,request);
@@ -245,6 +244,24 @@ public class WebviewOverlay extends Fragment{
                 i.setType("image/*");
                 startActivityForResult(Intent.createChooser(i, "File Chooser"), FILECHOOSER_RESULTCODE);
             }
+
+            @Override
+            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
+                WebView newWebView = new WebView(context);
+                WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
+                transport.setWebView(newWebView);
+                resultMsg.sendToTarget();
+                newWebView.setWebViewClient(new WebViewClient() {
+                    @Override
+                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW);
+                        browserIntent.setData(Uri.parse(url));
+                        startActivity(browserIntent);
+                        return true;
+                    }
+                });
+                return true;
+            }
         });
         String botUrl = getBotUrl(context);
         myWebView.loadUrl(botUrl);
@@ -296,10 +313,11 @@ public class WebviewOverlay extends Fragment{
         String botUrl = "file:///android_asset/cg-widget/load.html" + configUrl;
         File widgetDir = new File(context.getFilesDir(), "cg-widget-"+widgetVersion);
         if(widgetDir.isDirectory()){
-            String filePath = "file:///" + context.getFilesDir() + "/cg-widget-" + widgetVersion + "/load.html";
-            Log.d("WebviewConsoleFP: ", filePath);
-            File loadFile = new File( filePath );
-            if(loadFile.exists()){
+            String rawPath = context.getFilesDir() + "/cg-widget-" + widgetVersion + "/load.html";
+            File rawFile = new File(rawPath);
+            if(rawFile.exists()){
+                String filePath = "file:///" + rawPath;
+                File loadFile = new File( filePath );
                 botUrl = loadFile.toString() + configUrl;
             }
         }
