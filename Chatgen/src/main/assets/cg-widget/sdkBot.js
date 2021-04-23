@@ -1,14 +1,57 @@
 /* eslint-disable */
 
-const baseUrls = {
-  dev: 'https://dev.chatgen.ai/cmp/chat-widget',
-  test: 'https://test.chatgen.ai/cmp/chat-widget',
-  app2: 'https://storage.googleapis.com/chatgen-static-files/widget-app2/v1.24',
-  app: 'https://storage.googleapis.com/chatgen-static-files/widget-app/v1.24'
-};
+function setWithExpiry (key, value, ttl) {
+  var now = new Date();
 
-const baseUrl = baseUrls["test"];
-console.log("comingtobotjs", baseUrl);
+  // `item` is an object which contains the original value
+  // as well as the time when it's supposed to expire
+  var item = {
+    value: value,
+    expiry: now.getTime() + ttl
+  };
+  localStorage.setItem(key, JSON.stringify(item));
+}
+
+function getWithExpiry (key) {
+  var itemStr = localStorage.getItem(key);
+  // if the item doesn't exist, return null
+  if (!itemStr) {
+    return null;
+  }
+  var item = JSON.parse(itemStr);
+  var now = new Date();
+  // compare the expiry time of the item with the current time
+  if (now.getTime() > item.expiry) {
+    // If the item is expired, delete the item from storage
+    // and return null
+    localStorage.removeItem(key);
+    return null;
+  }
+  return item.value;
+}
+
+var cookies;
+
+function setCookies () {
+  try{
+    if (ChatgenHandler) {
+      var myCookies = '';
+      var chatgen_aid = getWithExpiry('chatgen_aid');
+      if (chatgen_aid) {
+        myCookies += 'chatgen_aid=' + chatgen_aid + ';';
+      }
+      var SESSION = 'chatgen-session-cookie-id';
+      var session_id = getWithExpiry(SESSION);
+      if (session_id) {
+        myCookies += SESSION + '=' + session_id + ';';
+      }
+      cookies = myCookies;
+    }
+  }catch(e){
+    console.log("ChatGenHandler was not there");
+  }
+}
+
 window.ChatGen = (function () {
   const isMobile = screen.width < 481;
   const getIframe = () => document.getElementById('selekt-chat-widget');
@@ -23,11 +66,10 @@ window.ChatGen = (function () {
       iframe.style.right = '0';
       iframe.style.left = '0';
       iframe.style.top = '0';
-    }
-    else {
+    } else {
       iframe.style.height = '90vh';
       iframe.style.width = '400px';
-      if (posType.includes('middle')) {
+      if (posType && posType.includes('middle')) {
         iframe.style.bottom = '24px';
       }
     }
@@ -35,7 +77,7 @@ window.ChatGen = (function () {
 
   const updateStylesInIframe = (styles) => {
     const iframe = getIframe();
-    for(let key in styles) {
+    for (const key in styles) {
       iframe.style[key] = styles[key];
     }
     const isMobile = screen.width < 481;
@@ -46,12 +88,6 @@ window.ChatGen = (function () {
     iframe.style.height = dimensions.height;
     iframe.style.width = dimensions.width;
   };
-
-  const isDevelopment = false;
-//  if (!isDevelopment) {
-//    console.log = () => { };
-//    console.warn = () => { };
-//  }
 
   var widget_key;
   var browser = function () {
@@ -109,17 +145,13 @@ window.ChatGen = (function () {
 
     if (macosPlatforms.indexOf(platform) !== -1) {
       os = 'Mac OS';
-    }
-    else if (iosPlatforms.indexOf(platform) !== -1) {
+    } else if (iosPlatforms.indexOf(platform) !== -1) {
       os = 'iOS';
-    }
-    else if (windowsPlatforms.indexOf(platform) !== -1) {
+    } else if (windowsPlatforms.indexOf(platform) !== -1) {
       os = 'Windows';
-    }
-    else if (/Android/.test(userAgent)) {
+    } else if (/Android/.test(userAgent)) {
       os = 'Android';
-    }
-    else if (!os && /Linux/.test(platform)) {
+    } else if (!os && /Linux/.test(platform)) {
       os = 'Linux';
     }
 
@@ -179,8 +211,8 @@ window.ChatGen = (function () {
           width: window.innerWidth
         }
       }, '*')
-    )
-  }
+    );
+  };
 
   let isBotLoaded = false;
   return {
@@ -195,11 +227,11 @@ window.ChatGen = (function () {
       _args.url = window.location.href;
       _args.widget_key = widget_key;
       const iframeElement = document.getElementById('selekt-chat-widget');
-      if(isBotLoaded) {
+      if (isBotLoaded) {
         iframeElement.contentWindow.postMessage(_args, '*');
       } else {
         setTimeout(() => {
-          this.startInteraction(interactionId)
+          this.startInteraction(interactionId);
         }, 500);
       }
     },
@@ -207,7 +239,7 @@ window.ChatGen = (function () {
     sendMessage: function (message) {
       var _args = { type: 'sendMessage', message };
       const iframeElement = document.getElementById('selekt-chat-widget');
-      if(isBotLoaded){
+      if (isBotLoaded) {
         iframeElement.contentWindow.postMessage(_args, '*');
       } else {
         setTimeout(() => {
@@ -216,19 +248,19 @@ window.ChatGen = (function () {
       }
     },
 
-    openWidget: function () {
+    openChatWidget: function () {
       var _args = { type: 'openWidget', isChatgenLive: false };
       const url = window.location.href;
       const interactionLink = url.split('#');
-      if(interactionLink.includes('ChatGenLive')){
+      if (interactionLink.includes('ChatGenLive')) {
         _args.isChatgenLive = true;
       }
       const iframeElement = document.getElementById('selekt-chat-widget');
-      if(isBotLoaded) {
+      if (isBotLoaded) {
         iframeElement.contentWindow.postMessage(_args, '*');
       } else {
         setTimeout(() => {
-          this.openWidget()
+          this.openChatWidget();
         }, 500);
       }
     },
@@ -240,24 +272,24 @@ window.ChatGen = (function () {
     identify: function (identifiers) {
       window.chatgenSettings = { ...window.chatgenSettings, ...identifiers };
       const chatgenIframe = document.getElementById('selekt-chat-widget');
-      if(chatgenIframe) {
-        chatgenIframe.contentWindow.postMessage({ type: 'userIdentification', value: window.chatgenSettings }, '*')
+      if (chatgenIframe) {
+        chatgenIframe.contentWindow.postMessage({ type: 'userIdentification', value: window.chatgenSettings }, '*');
       }
     },
 
     init: function (Args, customPositions = {}) {
       _args = Args;
       const chatgenGAScript = `
-      <script>
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-      </script>
-      `;
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+        </script>
+        `;
       const scriptEl = document.createRange().createContextualFragment(chatgenGAScript);
       document.body.append(scriptEl);
-      console.log("WidgetKey", _args.widget_key);
+      console.log('WidgetKey', _args.widget_key);
       if (typeof _args.widget_key !== 'undefined') {
         widget_key = _args.widget_key;
         _args.identifier = window.chatgenSettings;
@@ -266,15 +298,15 @@ window.ChatGen = (function () {
             console.log('return bhai ek bar hai');
             return;
           }
-          console.log('inject iframe');
+          console.log('Inject iframe');
+          setCookies();
           loaded = true;
           window.ChatGen.loaded = true;
           const iframe = document.createElement('iframe');
           iframe.id = 'selekt-chat-widget';
-          iframe.src = 'file:///android_asset/www/index.html';
-          console.log("iframe",iframe.src);
+          iframe.src = './index.html';
           iframe.style =
-            'display: block; bottom: unset; left: unset; right: unset; top: unset; border: none; min-width: unset; min-height: unset; position: fixed;visibility:hidden;border: 0px;z-index:9999999999;margin: 0px;padding: 0px;background: none; width:0px;height:0px';
+              'display: block; bottom: unset; left: unset; right: unset; top: unset; border: none; min-width: unset; min-height: unset; position: fixed;visibility:hidden;border: 0px;z-index:9999999999;margin: 0px;padding: 0px;background: none; width:0px;height:0px';
           _args.ip_data = '';
           _args.browser_type = browser();
           _args.os_type = os();
@@ -282,7 +314,10 @@ window.ChatGen = (function () {
           _args.active_chat_id = getCookie('active_chat_id')
             ? getCookie('active_chat_id')
             : '';
-          _args.cookies = parent.document.cookie;
+          _args.cookies = cookies || parent.document.cookie;
+          const urlParams = new URLSearchParams(window.location.search);
+          const interactionId = urlParams.get('interactionId');
+          _args.interactionId = interactionId;
           _args.isOpener = window.opener !== null;
           document.body.appendChild(iframe);
           const imageModal = document.createElement('div');
@@ -298,7 +333,6 @@ window.ChatGen = (function () {
           document.body.appendChild(imageModal);
 
           imageModal.addEventListener('click', () => {
-            console.log('isOpen: ', window.ChatGen.isModalOpen);
             if (!window.ChatGen.isModalOpen) {
               return;
             }
@@ -313,13 +347,12 @@ window.ChatGen = (function () {
               wrapper.style.bottom = 'unset';
               wrapper.innerHTML = '';
             }, 200);
-            console.log('image modal clicked: ', imageEl);
             imageEl.style.transform = 'translateY(40px)';
-          })
+          });
 
           // For a new iframe, emit event to iframe
           iframe.onload = function () {
-            console.log("iframeonload");
+            console.log('Iframe Onload');
             iframe.contentWindow.postMessage(_args, '*');
             window.chatgenLoaded = true;
           };
@@ -349,7 +382,8 @@ window.ChatGen = (function () {
                   eventCategory: data.category,
                   eventAction: data.action,
                   eventLabel: data.label,
-                  eventValue: data.value },
+                  eventValue: data.value
+                },
                 'chatgen');
               }
               if (dataType === 'OPEN_IMAGE') {
@@ -376,65 +410,72 @@ window.ChatGen = (function () {
                 closeIcon.style.position = 'absolute';
                 closeIcon.style.top = closeIcon.style.right = '20px';
                 closeIcon.innerHTML = `
-                  <svg
-                  x="0px"
-                  y="0px"
-                  viewBox="0 0 47.971 47.971"
-                  fill="#eaeaea"
-                  width="17px"
-                  height="17px"
-                  style="cursor: pointer"
-                  >
-                    <g>
-                      <path
-                        d="M28.228,23.986L47.092,5.122c1.172-1.171,1.172-3.071,0-4.242c-1.172-1.172-3.07-1.172-4.242,0L23.986,19.744L5.121,0.88
-                        c-1.172-1.172-3.07-1.172-4.242,0c-1.172,1.171-1.172,3.071,0,4.242l18.865,18.864L0.879,42.85c-1.172,1.171-1.172,3.071,0,4.242
-                        C1.465,47.677,2.233,47.97,3,47.97s1.535-0.293,2.121-0.879l18.865-18.864L42.85,47.091c0.586,0.586,1.354,0.879,2.121,0.879
-                        s1.535-0.293,2.121-0.879c1.172-1.171,1.172-3.071,0-4.242L28.228,23.986z">
-                      </path>
-                    </g>
-                  </svg>
-                `;
+                    <svg
+                    x="0px"
+                    y="0px"
+                    viewBox="0 0 47.971 47.971"
+                    fill="#eaeaea"
+                    width="17px"
+                    height="17px"
+                    style="cursor: pointer"
+                    >
+                      <g>
+                        <path
+                          d="M28.228,23.986L47.092,5.122c1.172-1.171,1.172-3.071,0-4.242c-1.172-1.172-3.07-1.172-4.242,0L23.986,19.744L5.121,0.88
+                          c-1.172-1.172-3.07-1.172-4.242,0c-1.172,1.171-1.172,3.071,0,4.242l18.865,18.864L0.879,42.85c-1.172,1.171-1.172,3.071,0,4.242
+                          C1.465,47.677,2.233,47.97,3,47.97s1.535-0.293,2.121-0.879l18.865-18.864L42.85,47.091c0.586,0.586,1.354,0.879,2.121,0.879
+                          s1.535-0.293,2.121-0.879c1.172-1.171,1.172-3.071,0-4.242L28.228,23.986z">
+                        </path>
+                      </g>
+                    </svg>
+                  `;
                 el.appendChild(closeIcon);
               }
               if (dataType === 'SET_COOKIE' || dataType === 'ERASE_COOKIE') {
+                document.cookie = data.value;
+                var split = data.value.split(';');
+                var name = split[0].split('=')[0];
+                var value = split[0].split('=')[1];
+                var expiry = split[1].split('=')[1];
+                var expiryDate = new Date(expiry);
+                try{
+                  ChatgenHandler.setCookie(data.value);
+                } catch(e) {
+                  console.log("ChatgenHandler not there.");
+                }
+                setWithExpiry(name, value, expiryDate.getTime() - (new Date().getTime()));
                 parent.document.cookie = data.value;
               }
               if (dataType === 'GET_COOKIE') {
-                var cookies = parent.document.cookie;
                 isBotLoaded = true;
                 iframe.contentWindow.postMessage({ origin: 'cookies', cookies: cookies, args: e.data.args }, '*');
                 sendDimentions();
                 try{
                   ChatgenHandler.botLoaded();
                 }catch(e){
-                  console.log(e);
+                  console.log("ChatgenHandler not there");
                 }
-              }
-              else if (dataType === 'WIDGET_CLOSED'){
+              } else if (dataType === 'WIDGET_CLOSED') {
                 try{
                   ChatgenHandler.closeBot();
-                } catch(e){
-                  console.log(e);
+                } catch(e) {
+                  console.log("ChatgenHandler not there");  
                 }
-              }
-              else if (
+              } else if (
                 dataType === 'NOTIFICATION_ON' ||
-                dataType === 'NOTIFICATION_OFF'
+                  dataType === 'NOTIFICATION_OFF'
               ) {
                 if (data.status === 'on') {
                   PageTitleNotification.On(data.message, data.time);
-                }
-                else {
+                } else {
                   PageTitleNotification.Off();
                 }
-              }
-              else {
+              } else {
                 try {
                   data = typeof data === 'string' ? JSON.parse(data) : data;
                   if (
                     data.isWidgetActive ||
-                    (data.messages && data.messages.length > 0)
+                      (data.messages && data.messages.length > 0)
                   ) {
                     document.getElementById(
                       'selekt-chat-widget'
@@ -443,8 +484,7 @@ window.ChatGen = (function () {
                   if (data.visible) {
                     const posType = isMobile ? data.mobilePos : data.desktopPos;
                     openWidget(posType);
-                  }
-                  else {
+                  } else {
                     var mobilePosition = getPositions('mobile');
                     var desktopPosition = getPositions('desktop');
                     const offset = isMobile ? '8px' : '24px';
@@ -476,40 +516,34 @@ window.ChatGen = (function () {
                           width: 400
                         });
                       }
-                    }
-                    else {
+                    } else {
                       const posType = isMobile ? data.mobilePos : data.desktopPos;
                       if (posType === 'bottomRight') {
                         updateStylesInIframe({
                           ...bottomConstraint,
                           ...rightConstraint
                         });
-                      }
-                      else if (posType === 'bottomLeft') {
+                      } else if (posType === 'bottomLeft') {
                         updateStylesInIframe({
                           ...bottomConstraint,
                           ...leftConstraint
                         });
-                      }
-                      else if (posType === 'middleLeft') {
+                      } else if (posType === 'middleLeft') {
                         updateStylesInIframe({
                           ...middleConstraint,
                           ...leftConstraint
                         });
-                      }
-                      else if (posType === 'middleRight') {
+                      } else if (posType === 'middleRight') {
                         updateStylesInIframe({
                           ...middleConstraint,
                           ...rightConstraint
                         });
-                      }
-                      else if (posType === 'topLeft') {
+                      } else if (posType === 'topLeft') {
                         updateStylesInIframe({
                           ...topConstraint,
                           ...leftConstraint
                         });
-                      }
-                      else if (posType === 'topRight') {
+                      } else if (posType === 'topRight') {
                         updateStylesInIframe({
                           ...topConstraint,
                           ...rightConstraint
@@ -517,8 +551,7 @@ window.ChatGen = (function () {
                       }
                     }
                   }
-                }
-                catch (e) {
+                } catch (e) {
                   console.log(e);
                 }
               }
@@ -528,8 +561,7 @@ window.ChatGen = (function () {
           function bindEvent (element, eventName, eventHandler) {
             if (element.addEventListener) {
               element.addEventListener(eventName, eventHandler, false);
-            }
-            else if (element.attachEvent) {
+            } else if (element.attachEvent) {
               element.attachEvent('on' + eventName, eventHandler);
             }
           }
@@ -537,8 +569,7 @@ window.ChatGen = (function () {
         function winLoad (callback) {
           if (document.readyState === 'complete') {
             callback();
-          }
-          else {
+          } else {
             window.addEventListener('load', callback);
           }
         }
