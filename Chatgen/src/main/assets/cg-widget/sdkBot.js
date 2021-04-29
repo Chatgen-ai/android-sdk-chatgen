@@ -1,5 +1,13 @@
 /* eslint-disable */
 
+let visitorAttributes = new URLSearchParams(window.location.search).get("visitorAttributes") || null;
+
+if(visitorAttributes) {
+  try{
+    visitorAttributes = JSON.parse(visitorAttributes);
+  } catch(e){}
+}
+
 function setWithExpiry (key, value, ttl) {
   var now = new Date();
 
@@ -278,6 +286,7 @@ window.ChatGen = (function () {
     },
 
     init: function (Args, customPositions = {}) {
+      const that = this;
       _args = Args;
       const chatgenGAScript = `
         <script>
@@ -455,6 +464,9 @@ window.ChatGen = (function () {
                 }catch(e){
                   console.log("ChatgenHandler not there");
                 }
+              }
+              if (dataType === 'VISITOR_IDENTIFIED' && visitorAttributes) {
+                that.identify(visitorAttributes);
               } else if (dataType === 'WIDGET_CLOSED') {
                 try{
                   ChatgenHandler.closeBot();

@@ -7,8 +7,12 @@ import android.widget.FrameLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.chatgen.chatgen.Chatgen;
-import com.example.chatgen_sdk_android.R;
+import com.chatgenmessenger.chat.Chatgen;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
     Chatgen chatgen;
@@ -17,8 +21,24 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         chatgen = Chatgen.getInstance();
-        FrameLayout frameLayout = findViewById(R.id.relativeMine);
         chatgen.init(this,"mllw2FpN");
+
+        Random rand = new Random();
+        int empSalary = rand.nextInt(100000);
+
+        JSONObject visitorAttributes = new JSONObject();
+        try {
+            JSONObject customAttributes = new JSONObject();
+            customAttributes.put("emp_name", "Mohan Sai Raju");
+            customAttributes.put("emp_salary", empSalary);
+            visitorAttributes.put("name", "Mohan"+empSalary);
+            visitorAttributes.put("custom_attributes", customAttributes);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        chatgen.identify(visitorAttributes);
+
+        FrameLayout frameLayout = findViewById(R.id.relativeMine);
 
         chatgen.onEventFromBot(botEvent -> {
             Log.d("GoodLord", botEvent.getCode());

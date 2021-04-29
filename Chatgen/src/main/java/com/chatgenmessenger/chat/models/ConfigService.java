@@ -1,6 +1,6 @@
-package com.chatgen.chatgen.models;
+package com.chatgenmessenger.chat.models;
 
-import com.chatgen.chatgen.ChatgenConfig;
+import com.chatgenmessenger.chat.ChatgenConfig;
 
 public class ConfigService {
     private static ConfigService configInstance;
