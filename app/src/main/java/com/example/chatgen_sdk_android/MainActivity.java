@@ -29,10 +29,9 @@ public class MainActivity extends AppCompatActivity {
         JSONObject visitorAttributes = new JSONObject();
         try {
             JSONObject customAttributes = new JSONObject();
-            customAttributes.put("emp_name", "Mohan Sai Raju");
-            customAttributes.put("emp_salary", empSalary);
+            visitorAttributes.put("emp_name", "Mohan Sai Raju");
+            visitorAttributes.put("emp_salary", empSalary);
             visitorAttributes.put("name", "Mohan"+empSalary);
-            visitorAttributes.put("custom_attributes", customAttributes);
         } catch (JSONException e) {
             e.printStackTrace();
         }

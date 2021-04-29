@@ -5,6 +5,7 @@ let visitorAttributes = new URLSearchParams(window.location.search).get("visitor
 if(visitorAttributes) {
   try{
     visitorAttributes = JSON.parse(visitorAttributes);
+    window.chatgenSettings = visitorAttributes;
   } catch(e){}
 }
 
