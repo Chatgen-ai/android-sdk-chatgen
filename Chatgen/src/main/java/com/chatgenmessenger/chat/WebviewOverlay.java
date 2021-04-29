@@ -1,4 +1,4 @@
-package com.chatgen.chatgen;
+package com.chatgenmessenger.chat;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -31,9 +31,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
-import com.chatgen.chatgen.models.ChatbotEventResponse;
-import com.chatgen.chatgen.models.ConfigService;
-import com.chatgen.chatgen.models.JavaScriptInterface;
+import com.chatgenmessenger.chat.models.ChatbotEventResponse;
+import com.chatgenmessenger.chat.models.ConfigService;
+import com.chatgenmessenger.chat.models.JavaScriptInterface;
 import com.facebook.binaryresource.BinaryResource;
 import com.facebook.cache.common.CacheKey;
 import com.facebook.cache.disk.FileCache;
@@ -51,6 +51,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -321,6 +323,14 @@ public class WebviewOverlay extends Fragment{
                 botUrl = loadFile.toString() + configUrl;
             }
         }
+        String visitorDetailsJSON = null;
+        try {
+            visitorDetailsJSON = URLEncoder.encode(String.valueOf(ConfigService.getInstance().getConfig().visitorAttributes), "UTF-8");
+            botUrl += "&visitorAttributes=" + visitorDetailsJSON;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        Log.d("printboturl", botUrl);
         return botUrl;
     }
 

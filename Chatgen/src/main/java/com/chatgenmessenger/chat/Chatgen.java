@@ -1,14 +1,12 @@
-package com.chatgen.chatgen;
+package com.chatgenmessenger.chat;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
-import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
-import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -24,8 +22,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.chatgen.chatgen.models.ChatbotEventResponse;
-import com.chatgen.chatgen.models.ConfigService;
+import com.chatgenmessenger.chat.models.ChatbotEventResponse;
+import com.chatgenmessenger.chat.models.ConfigService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -42,10 +40,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.Executor;
 
-import static com.chatgen.chatgen.WebviewOverlay.readFromCacheSync;
-import static com.chatgen.chatgen.WebviewResourceMappingHelper.getWebResourceResponseFromAsset;
+import static com.chatgenmessenger.chat.WebviewResourceMappingHelper.getWebResourceResponseFromAsset;
 
 public class Chatgen {
 
@@ -108,6 +104,10 @@ public class Chatgen {
         webViewIntent = new Intent(webViewContext, BotWebView.class);
         webViewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         webViewContext.startActivity(webViewIntent);
+    }
+
+    public void identify(JSONObject visitorAttributes) {
+        config.visitorAttributes = visitorAttributes;
     }
 
     public void closeBot(){
@@ -268,7 +268,7 @@ public class Chatgen {
                 }
                 if (fileExtension.endsWith("jpg")) {
                     try {
-                        InputStream inputStream = readFromCacheSync(resourceUrl);
+                        InputStream inputStream = WebviewOverlay.readFromCacheSync(resourceUrl);
                         if (inputStream != null) {
                             return new WebResourceResponse("image/jpg", "UTF-8", inputStream);
                         }

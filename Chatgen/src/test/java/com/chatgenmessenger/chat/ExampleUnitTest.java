@@ -1,4 +1,4 @@
-package com.chatgen.chatgen;
+package com.chatgenmessenger.chat;
 
 import org.junit.Test;
 

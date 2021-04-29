@@ -1,16 +1,9 @@
-package com.chatgen.chatgen;
-
-import com.chatgen.chatgen.Chatgen;
+package com.chatgenmessenger.chat;
 
 import android.content.Context;
 import android.os.Build;
-import android.util.Log;
 import android.webkit.WebResourceResponse;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -18,7 +11,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

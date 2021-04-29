@@ -1,12 +1,11 @@
-package com.chatgen.chatgen.models;
+package com.chatgenmessenger.chat.models;
 
-import android.os.Build;
 import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
-import com.chatgen.chatgen.BotWebView;
+import com.chatgenmessenger.chat.BotWebView;
 
 public class JavaScriptInterface {
     protected BotWebView parentActivity;

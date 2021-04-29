@@ -1,4 +1,4 @@
-package com.chatgen.chatgen;
+package com.chatgenmessenger.chat;
 
 import android.content.Context;
 

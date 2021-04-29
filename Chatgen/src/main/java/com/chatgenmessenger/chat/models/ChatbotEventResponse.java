@@ -1,4 +1,4 @@
-package com.chatgen.chatgen.models;
+package com.chatgenmessenger.chat.models;
 
 public class ChatbotEventResponse {
     String code, data;
