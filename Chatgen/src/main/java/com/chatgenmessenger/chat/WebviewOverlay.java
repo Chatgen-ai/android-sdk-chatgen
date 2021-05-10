@@ -267,6 +267,7 @@ public class WebviewOverlay extends Fragment{
         });
         String botUrl = getBotUrl(context);
         myWebView.loadUrl(botUrl);
+        ConfigService.getInstance().setWebViewActiveState(true);
         this.start = System.nanoTime();
         return myWebView;
     }
@@ -275,6 +276,7 @@ public class WebviewOverlay extends Fragment{
     //Empty url string on bot-close
     public void closeBot() {
         myWebView.loadUrl("");
+        ConfigService.getInstance().setWebViewActiveState(false);
     }
 
     public void onMessage() {
@@ -292,7 +294,7 @@ public class WebviewOverlay extends Fragment{
 
     // Sending messages to bot
     public void sendMessage(String s) {
-        String jsScript = "javascript:(setTimeout(function(){ChatGen.sendMessage('"+s+"')}, 500))";
+        String jsScript = "javascript:(function(){ChatGen.displayMessage('"+s+"')})()";
         myWebView.post(new Runnable() {
             @Override
             public void run() {
@@ -311,18 +313,20 @@ public class WebviewOverlay extends Fragment{
         String widgetVersion = ConfigService.getInstance().getConfig().version;
         String serverRoot = ConfigService.getInstance().getConfig().serverRoot;
         String interactionId = ConfigService.getInstance().getConfig().dialogId;
-        String configUrl = "?server=" + serverRoot + "&key=" + widgetKey + "&interactionId=" + interactionId + "&isChatGenSDK=1";
+        String activeChatId = ConfigService.getInstance().getConfig().activeChatId;
+        ConfigService.getInstance().setActiveChatId("");
+        String configUrl = "?server=" + serverRoot + "&key=" + widgetKey + "&interactionId=" + interactionId + "&sdkChatId=" + activeChatId;
         String botUrl = "file:///android_asset/cg-widget/load.html" + configUrl;
         File widgetDir = new File(context.getFilesDir(), "cg-widget-"+widgetVersion);
-        if(widgetDir.isDirectory()){
-            String rawPath = context.getFilesDir() + "/cg-widget-" + widgetVersion + "/load.html";
-            File rawFile = new File(rawPath);
-            if(rawFile.exists()){
-                String filePath = "file:///" + rawPath;
-                File loadFile = new File( filePath );
-                botUrl = loadFile.toString() + configUrl;
-            }
-        }
+//        if(widgetDir.isDirectory()){
+//            String rawPath = context.getFilesDir() + "/cg-widget-" + widgetVersion + "/load.html";
+//            File rawFile = new File(rawPath);
+//            if(rawFile.exists()){
+//                String filePath = "file:///" + rawPath;
+//                File loadFile = new File( filePath );
+//                botUrl = loadFile.toString() + configUrl;
+//            }
+//        }
         String visitorDetailsJSON = null;
         try {
             visitorDetailsJSON = URLEncoder.encode(String.valueOf(ConfigService.getInstance().getConfig().visitorAttributes), "UTF-8");

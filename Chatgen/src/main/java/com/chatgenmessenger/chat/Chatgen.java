@@ -1,9 +1,21 @@
 package com.chatgenmessenger.chat;
 
+import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.media.RingtoneManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
@@ -15,6 +27,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -40,11 +53,12 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.chatgenmessenger.chat.WebviewResourceMappingHelper.getWebResourceResponseFromAsset;
 
 public class Chatgen {
-
     private static Context webViewContext;
     private static Intent webViewIntent;
     private static Chatgen botPluginInstance;
@@ -82,12 +96,7 @@ public class Chatgen {
         config = new ChatgenConfig(s);
         ConfigService.getInstance().setConfigData(config);
         getRemoteAssets(context);
-        new android.os.Handler(Looper.getMainLooper()).postDelayed(
-            new Runnable() {
-                public void run() {
-                    loadWebview(context);
-                }
-            }, 50);
+        preLoadWebView(context);
     }
 
     public void startChatbot(Context context) {
@@ -118,7 +127,7 @@ public class Chatgen {
         localListener.onSuccess(new ChatbotEventResponse("sendMessage", s));
     }
 
-    public void emitEvent(ChatbotEventResponse event){
+    public static void emitEvent(ChatbotEventResponse event){
         if(event != null){
             botListener.onSuccess(event);
             localListener.onSuccess(event);
@@ -213,7 +222,7 @@ public class Chatgen {
         }
     }
 
-    public void loadWebview(Context context){
+    public void preLoadWebView(Context context){
         myWebView = new WebView(context);
 
         String serverRoot = ConfigService.getInstance().getConfig().serverRoot;
@@ -290,6 +299,84 @@ public class Chatgen {
             }
         });
         myWebView.loadUrl(botUrl);
+    }
+
+    public void sendFCMToken(String fcmToken){
+        config.fcmToken = fcmToken;
+    }
+
+    public void pushMessage(Context context, Map message, Integer notificationIcon) {
+
+        if(ConfigService.getInstance().getConfig().isWebviewActive){
+            return;
+        }
+        String chatId = (String) message.get("chat_id");
+        config.activeChatId = chatId;
+        Intent intent = new Intent(context, BotWebView.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+
+        Resources resources = context.getResources();
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, "channel_id")
+                .setContentTitle((CharSequence) message.get("title"))
+                .setContentText((CharSequence) message.get("body"))
+                .setAutoCancel(true)
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setContentIntent(pendingIntent)
+                .setContentInfo((CharSequence) message.get("title"))
+                .setDefaults(Notification.DEFAULT_VIBRATE)
+                .setSmallIcon(notificationIcon);
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // Notification Channel is required for Android O and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    "channel_id", "channel_name", NotificationManager.IMPORTANCE_DEFAULT
+            );
+            channel.setDescription("channel description");
+            channel.setShowBadge(true);
+            channel.canShowBadge();
+            channel.enableLights(true);
+            channel.enableVibration(true);
+            channel.setVibrationPattern(new long[]{100, 200, 300, 400, 500});
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        notificationManager.notify(0, notificationBuilder.build());
+    }
+
+    public Boolean isChatGenPush(Map message) {
+        if(message.get("org").equals("ChatGen")) {
+            return true;
+        }
+        return false;
+    }
+
+    public Boolean isChatGenPush(Bundle extras) {
+        try {
+            String org = extras.getString("org");
+            if(org.equals("ChatGen")){
+                return true;
+            }
+            return false;
+        }catch (NullPointerException e){
+            return false;
+        }
+    }
+
+    public void pushMessage(Context context, Bundle extras) {
+        try {
+            String chat_id = extras.getString("chat_id");
+            config.activeChatId = chat_id;
+            webViewContext = context;
+            webViewIntent = new Intent(webViewContext, BotWebView.class);
+            webViewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            webViewContext.startActivity(webViewIntent);
+        }catch (NullPointerException e){
+            Log.d("NULLPOINTER", e.getMessage());
+        }
     }
 }
 

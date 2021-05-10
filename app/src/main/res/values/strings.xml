@@ -1,8 +1,29 @@
 <resources>
-    <string name="app_name">chatgen-sdk-android</string>
+    <string name="app_name">ChatGen Android</string>
+    <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="display_launcher">Display Launcher Icon</string>
     <string name="hide_launcher">Hide Launcher Icon</string>
-    <string name="open_chat">Open Chatbot</string>
-    <string name="start_dialog">Start Dialog</string>
-    <string name="send_dialog">Open Chatbot and Send Message</string>
+
+    <string name="open_chat_text">This function will start the Chatbot and connect to the Live Support.</string>
+    <string name="open_chat">Start Chatbot</string>
+
+    <string name="send_dialog_msg_txt">This function will start the Chatbot, connect to the Live Support and along with that it will send a user message(Hello, I am John.).</string>
+    <string name="send_dialog">Start Chatbot and Send Message</string>
+
+    <string name="start_dialog_text">Instead of connecting to live support, this function will start the bot flow of particular dialog, which can be configured in ChatGen Dashboard.</string>
+    <string name="start_dialog">Start Chatbot with dialog flow</string>
+
+    <string name="vis_text">If you have some user details in your app, and you need to send them to ChatGen, you can use this function. After using this function details will be sent to ChatGen whenever Bot is started.\n\nFor example: If you click the below button User\'s name will be set as <i>John</i>.\n\nNow click on <b>START CHATBOT WITH DIALOG FLOW</b> button You can see the starting message as <b><i>Hey John</i></b></string>
+    <string name="vis_btn">Set User details</string>
+
+    <string name="notify_text">This function will generate FirebaseMessaging token and send it to the ChatGen.\n\nYou will receive notifications from Bot and Live Agent, when clicked on notification, you will be redirected to the respective conversation.\n\nYou won\'t receive notifications when you are in ChatWidget.</string>
+    <string name="token_btn">Send FCM Token</string>
 </resources>
