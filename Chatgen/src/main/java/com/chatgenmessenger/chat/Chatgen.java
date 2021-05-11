@@ -99,15 +99,17 @@ public class Chatgen {
         preLoadWebView(context);
     }
 
-    public void startChatbot(Context context) {
+    public void startChatbot(Context context, Boolean continuePreviousChat) {
         config.dialogId = "";
+        config.continuePreviousChat = continuePreviousChat;
         webViewContext = context;
         webViewIntent = new Intent(webViewContext, BotWebView.class);
         webViewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         webViewContext.startActivity(webViewIntent);
     }
 
-    public void startChatbotWithDialog(Context context, String dialogId) {
+    public void startChatbotWithDialog(Context context, String dialogId, Boolean continuePreviousChat) {
+        config.continuePreviousChat = continuePreviousChat;
         config.dialogId = dialogId;
         webViewContext = context;
         webViewIntent = new Intent(webViewContext, BotWebView.class);

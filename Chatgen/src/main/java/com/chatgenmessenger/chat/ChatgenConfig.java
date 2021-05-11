@@ -6,8 +6,8 @@ public class ChatgenConfig {
     public String widgetKey;
     public String dialogId = "";
     public String version = "";
-    public String serverRoot = "dev";
-    public String apiRoot = "devapi";
+    public String serverRoot = "app";
+    public String apiRoot = "api";
     public String activeChatId = "";
     public Boolean isWebviewActive = false;
     public Boolean continuePreviousChat = false;

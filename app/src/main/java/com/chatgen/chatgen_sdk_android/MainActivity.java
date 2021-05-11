@@ -27,12 +27,12 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity {
     Chatgen chatgen;
     Boolean sendMessageStatus = false;
-    String interactionId = "819893";
+    String interactionId = "517155";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         chatgen = Chatgen.getInstance();
-        chatgen.init(this, "6O9Nk5vz");
+        chatgen.init(this, "mllw2FpN");
         super.onCreate(savedInstanceState);
         chatgen.onEventFromBot(botEvent -> {
             if(botEvent.getCode() == "bot-loaded" && sendMessageStatus == true){
@@ -45,15 +45,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void openChat(View v) {
-        chatgen.startChatbot(this);
+        chatgen.startChatbot(this, false);
     }
 
     public void startDialog(View v){
-        chatgen.startChatbotWithDialog(this, interactionId);
+        chatgen.startChatbotWithDialog(this, interactionId, true);
     }
 
     public void sendChatMessage(View v) {
-        chatgen.startChatbot(this);
+        chatgen.startChatbot(this, false);
         sendMessageStatus = true;
     }
 

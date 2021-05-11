@@ -197,21 +197,6 @@ var PageTitleNotification = {
     document.title = this.Vars.OriginalTitle;
   }
 };
-function getCookie (cname) {
-  var name = cname + '=';
-  var decodedCookie = decodeURIComponent(parent.document.cookie);
-  var ca = decodedCookie.split(';');
-  for (var i = 0; i < ca.length; i++) {
-    var c = ca[i];
-    while (c.charAt(0) === ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) === 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return '';
-};
 
 const sendDimentions = () => {
   const iframe = document.getElementById('selekt-chat-widget');
@@ -336,13 +321,14 @@ return {
         _args.browser_type = browser();
         _args.os_type = os();
         _args.url = window.location.href;
-        _args.active_chat_id = getCookie('active_chat_id')
-          ? getCookie('active_chat_id')
+        _args.active_chat_id = getWithExpiry('active_chat_id')
+          ? getWithExpiry('active_chat_id')
           : '';
         _args.cookies = cookies || parent.document.cookie;
         _args.interactionId = searchURLParams('interactionId');
         _args.sdkChatId = searchURLParams('sdkChatId');
         _args.sdkfcmToken = searchURLParams('fcmToken');
+        _args.continuePreviousChat = Number(searchURLParams('continuePreviousChat'));
         _args.isOpener = window.opener !== null;
         document.body.appendChild(iframe);
         const imageModal = document.createElement('div');

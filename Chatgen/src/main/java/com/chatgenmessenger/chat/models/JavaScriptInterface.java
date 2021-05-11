@@ -29,7 +29,7 @@ public class JavaScriptInterface {
         parentActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Log.d("WebViewConsoleMessage", "set cookie: " + value);
+                Log.d("WebViewConsoleMessage", "setCookie: " + value);
                 cookieManager.setCookie("https://foo.com", value);
                 String result = cookieManager.getCookie("https://foo.com");
             }
