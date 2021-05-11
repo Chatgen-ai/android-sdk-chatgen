@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "497097004534",
+    "project_id": "sdk-push-notifications",
+    "storage_bucket": "sdk-push-notifications.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497097004534:android:f370f919dad11718f5e3d7",
+        "android_client_info": {
+          "package_name": "com.chatgen.chatgen_sdk_android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "497097004534-ma7qdd5agdtcqobn5mpcaoagqq9r4sva.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIMq9m48NbtH_Rzj_3YDKfItgHFRZgyjQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "497097004534-ma7qdd5agdtcqobn5mpcaoagqq9r4sva.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

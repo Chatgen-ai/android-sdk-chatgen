@@ -1,46 +1,119 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/my_linear"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    tools:context="com.example.chatgen_sdk_android.MainActivity">
+    tools:context="com.cg.ChatGenDemoSDK.MainActivity">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/relativeMine"
-        android:background="@color/colorDark">
-    </FrameLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/linear"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
+    <TextView
+        android:id="@+id/openChatText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:layout_marginTop="10dp"
+        android:paddingTop="10dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="@string/open_chat_text"/>
     <Button
         android:id="@+id/openChat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_marginLeft="20dp"
         android:layout_marginTop="10dp"
         android:text="@string/open_chat"
-        android:textSize="15sp"
+        android:textSize="12sp"
         android:onClick="openChat"/>
 
-    <Button
-        android:id="@+id/startDialog"
+    <TextView
+        android:id="@+id/startBotAndSendMsg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:text="@string/start_dialog"
-        android:textSize="15sp"
-        android:onClick="startDialog"/>
+        android:textSize="16sp"
+        android:layout_marginTop="20dp"
+        android:paddingTop="10dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="@string/send_dialog_msg_txt"/>
 
     <Button
         android:id="@+id/sendMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_marginLeft="20dp"
         android:layout_marginTop="10dp"
         android:text="@string/send_dialog"
-        android:textSize="15sp"
+        android:textSize="12sp"
         android:onClick="sendChatMessage"/>
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/startDialogText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:layout_marginTop="20dp"
+        android:paddingTop="10dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="@string/start_dialog_text"/>
+
+    <Button
+        android:id="@+id/startDialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:text="@string/start_dialog"
+        android:textSize="12sp"
+        android:onClick="startDialog"/>
+
+    <TextView
+        android:id="@+id/storeVar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:layout_marginTop="20dp"
+        android:paddingTop="10dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="@string/vis_text"/>
+    <Button
+        android:id="@+id/setAttr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:text="@string/vis_btn"
+        android:textSize="12sp"
+        android:onClick="setAttributes"/>
+
+        <TextView
+            android:id="@+id/notifyText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_marginTop="20dp"
+            android:paddingTop="10dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="@string/notify_text"/>
+        <Button
+            android:id="@+id/notifyBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/token_btn"
+            android:textSize="12sp"
+            android:onClick="subscribeNotifications"/>
+    </LinearLayout>
+
+</ScrollView>

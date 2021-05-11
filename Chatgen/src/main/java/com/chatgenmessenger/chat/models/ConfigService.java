@@ -29,6 +29,14 @@ public class ConfigService {
         return false;
     }
 
+    public void setWebViewActiveState(Boolean status) {
+        config.isWebviewActive = status;
+    }
+
+    public void setActiveChatId(String activeChatId) {
+        config.activeChatId = activeChatId;
+    }
+
     public ChatgenConfig getConfig() {
         return config;
     }
