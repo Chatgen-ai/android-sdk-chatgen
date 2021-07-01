@@ -33,12 +33,12 @@ if (!itemStr) {
 var item = JSON.parse(itemStr);
 var now = new Date();
 // compare the expiry time of the item with the current time
-if (now.getTime() > item.expiry) {
-  // If the item is expired, delete the item from storage
-  // and return null
-  localStorage.removeItem(key);
-  return null;
-}
+// if (now.getTime() > item.expiry) {
+//   // If the item is expired, delete the item from storage
+//   // and return null
+//   localStorage.removeItem(key);
+//   return null;
+// }
 return item.value;
 }
 
@@ -222,6 +222,7 @@ return {
     _args.platform = os();
     _args.interactionId = interactionId.interactionId;
     _args.url = window.location.href;
+     _args.close=interactionId.close;
     _args.widget_key = widget_key;
     const iframeElement = document.getElementById('selekt-chat-widget');
     if (isBotLoaded) {

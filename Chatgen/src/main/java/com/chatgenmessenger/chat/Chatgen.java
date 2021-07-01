@@ -350,10 +350,15 @@ public class Chatgen {
     }
 
     public Boolean isChatGenPush(Map message) {
-        if(message.get("org").equals("ChatGen")) {
-            return true;
+        try{
+            String org = (String) message.get("org");
+            if(org.equals("ChatGen")) {
+                return true;
+            }
+            return false;
+        }catch (NullPointerException e) {
+            return false;
         }
-        return false;
     }
 
     public Boolean isChatGenPush(Bundle extras) {
