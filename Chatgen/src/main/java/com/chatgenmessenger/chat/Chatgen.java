@@ -67,7 +67,7 @@ public class Chatgen {
     private static BotEventListener botListener;
     private static BotEventListener localListener;
 
-    String baseUrl = "https://storage.googleapis.com/chatgen-static-files/";
+    String baseUrl = "https://chatgen-static-files.s3.ap-south-1.amazonaws.com/";
     String cgWidgetVersion = "cg-widget-version";
 
     public Chatgen(){

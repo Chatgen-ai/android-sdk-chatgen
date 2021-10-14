@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script type="text/javascript">
+      "use strict";
+      !(function () {
+        var a = window.ChatGen || [];
+        if (!a.loaded) {
+          var s = document.createElement("script");
+          s.type = "text/javascript";
+          s.async = true;
+          let params = new URLSearchParams(window.location.search);
+          let chatgenSettings = {};
+          for(let [key, value] of params) {
+            if (['server', 'key'].indexOf(key) == -1) {
+              chatgenSettings[key] = value;
+            }
+          }
+          window.chatgenSettings = chatgenSettings;
+          s.src = './sdkBot.js';
+          var fs = document.getElementsByTagName("script")[0];
+          fs.parentNode.insertBefore(s, fs);
+          s.onload = function () {
+            const yourKey = `${new URLSearchParams(window.location.search).get(
+              "key"
+            )}`;
+            const widgetKey = { widget_key: yourKey, isChatGenSDK: true };
+            ChatGen.init(widgetKey);
+          };
+        }
+      })();
+    </script>
+    <style>
+.se-pre-con {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: url(./loading.gif) center no-repeat #fff;
+}
+
+</style>
+</head>
+<body>
+<div id="se-pre-con" class="se-pre-con"></div>
+</body>
+</html>
