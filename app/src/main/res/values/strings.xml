@@ -21,6 +21,9 @@
     <string name="start_dialog_text">Instead of connecting to live support, this function will start the bot flow of particular dialog, which can be configured in ChatGen Dashboard.</string>
     <string name="start_dialog">Start Chatbot with dialog flow</string>
 
+    <string name="continue_prev_text">This will continue the previous conversation which you have left.</string>
+    <string name="continue_prev_btn">Continue Previous chat</string>
+
     <string name="vis_text">If you have some user details in your app, and you need to send them to ChatGen, you can use this function. After using this function details will be sent to ChatGen whenever Bot is started.\n\nFor example: If you click the below button User\'s name will be set as <i>John</i>.\n\nNow click on <b>START CHATBOT WITH DIALOG FLOW</b> button You can see the starting message as <b><i>Hey John</i></b></string>
     <string name="vis_btn">Set User details</string>
 

@@ -49,7 +49,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startDialog(View v){
-        chatgen.startChatbotWithDialog(this, interactionId, true);
+        chatgen.startChatbotWithDialog(this, interactionId, false);
+    }
+
+    public void continuePreviousChat(View v){
+        chatgen.startChatbot(this, true);
     }
 
     public void sendChatMessage(View v) {
