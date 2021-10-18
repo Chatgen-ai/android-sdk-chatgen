@@ -13,55 +13,42 @@ try{
 }
 
 function setWithExpiry (key, value, ttl) {
-var now = new Date();
-
-// `item` is an object which contains the original value
-// as well as the time when it's supposed to expire
-var item = {
-  value: value,
-  expiry: now.getTime() + ttl
-};
-localStorage.setItem(key, JSON.stringify(item));
+  var now = new Date();
+  // `item` is an object which contains the original value
+  // as well as the time when it's supposed to expire
+  var item = {
+    value: value,
+    expiry: now.getTime() + ttl
+  };
+  console.log('SET COOKIE', key, value);
+  localStorage.setItem(key, JSON.stringify(item));
 }
 
 function getWithExpiry (key) {
-var itemStr = localStorage.getItem(key);
-// if the item doesn't exist, return null
-if (!itemStr) {
-  return null;
-}
-var item = JSON.parse(itemStr);
-var now = new Date();
-// compare the expiry time of the item with the current time
-// if (now.getTime() > item.expiry) {
-//   // If the item is expired, delete the item from storage
-//   // and return null
-//   localStorage.removeItem(key);
-//   return null;
-// }
-return item.value;
+  var itemStr = localStorage.getItem(key);
+  // if the item doesn't exist, return null
+  if (!itemStr) {
+    return null;
+  }
+  var item = JSON.parse(itemStr);
+  console.log('GET COOKIE', key, item.value);
+  return item.value;
 }
 
 var cookies;
 
 function setCookies () {
-try{
-  if (ChatgenHandler) {
-    var myCookies = '';
-    var chatgen_aid = getWithExpiry('chatgen_aid');
-    if (chatgen_aid) {
-      myCookies += 'chatgen_aid=' + chatgen_aid + ';';
-    }
-    var SESSION = 'chatgen-session-cookie-id';
-    var session_id = getWithExpiry(SESSION);
-    if (session_id) {
-      myCookies += SESSION + '=' + session_id + ';';
-    }
-    cookies = myCookies;
+  var myCookies = '';
+  var chatgen_aid = getWithExpiry('chatgen_aid');
+  if (chatgen_aid) {
+    myCookies += 'chatgen_aid=' + chatgen_aid + ';';
   }
-}catch(e){
-  console.log("ChatGenHandler was not there");
-}
+  var SESSION = 'chatgen-session-cookie-id';
+  var session_id = getWithExpiry(SESSION);
+  if (session_id) {
+    myCookies += SESSION + '=' + session_id + ';';
+  }
+  cookies = myCookies;
 }
 
 window.ChatGen = (function () {
@@ -325,6 +312,8 @@ return {
         _args.active_chat_id = getWithExpiry('active_chat_id')
           ? getWithExpiry('active_chat_id')
           : '';
+          console.log("sdk bot js");
+          console.log(cookies);
         _args.cookies = cookies || parent.document.cookie;
         _args.interactionId = searchURLParams('interactionId');
         _args.sdkChatId = searchURLParams('sdkChatId');
@@ -450,11 +439,6 @@ return {
               var value = split[0].split('=')[1];
               var expiry = split[1].split('=')[1];
               var expiryDate = new Date(expiry);
-              try{
-                ChatgenHandler.setCookie(data.value);
-              } catch(e) {
-                console.log("ChatgenHandler not there.");
-              }
               setWithExpiry(name, value, expiryDate.getTime() - (new Date().getTime()));
               parent.document.cookie = data.value;
             }
@@ -474,7 +458,7 @@ return {
               try{
                 ChatgenHandler.closeBot();
               } catch(e) {
-                console.log("ChatgenHandler not there");  
+                console.log("ChatgenHandler not there");
               }
             } else if (
               dataType === 'NOTIFICATION_ON' ||
