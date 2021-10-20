@@ -312,8 +312,6 @@ return {
         _args.active_chat_id = getWithExpiry('active_chat_id')
           ? getWithExpiry('active_chat_id')
           : '';
-          console.log("sdk bot js");
-          console.log(cookies);
         _args.cookies = cookies || parent.document.cookie;
         _args.interactionId = searchURLParams('interactionId');
         _args.sdkChatId = searchURLParams('sdkChatId');
@@ -458,7 +456,7 @@ return {
               try{
                 ChatgenHandler.closeBot();
               } catch(e) {
-                console.log("ChatgenHandler not there");
+                console.log("ChatgenHandler not there");  
               }
             } else if (
               dataType === 'NOTIFICATION_ON' ||
